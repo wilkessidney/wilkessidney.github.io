@@ -1,0 +1,295 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Toc from '../../components/Toc.astro';
+import { getCollection, render } from 'astro:content';
+import { byDateDesc, formatDate, formatDateISO, calcReadingTime } from '../../utils/helpers';
+import { useTranslations } from '../../i18n/ui';
+
+export async function getStaticPaths() {
+  const articles = await getCollection('articles', ({ data }) => !data.draft);
+  return articles.map((article) => ({
+    params: { id: article.id },
+    props: { article },
+  }));
+}
+
+const { article } = Astro.props;
+const { Content, headings } = await render(article);
+const { title, date, updatedDate, summary, category, tags, readingTime } =
+  article.data;
+const t = useTranslations();
+const minutes = readingTime ?? calcReadingTime(article.body ?? '');
+const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://example.com')
+  .href;
+
+const all = byDateDesc(await getCollection('articles', ({ data }) => !data.draft));
+const idx = all.findIndex((a) => a.id === article.id);
+const prev = idx > 0 ? all[idx - 1] : null;
+const next = idx < all.length - 1 ? all[idx + 1] : null;
+
+const related = all
+  .filter((a) => a.id !== article.id)
+  .map((a) => {
+    const sharedTags = a.data.tags.filter((tag) => tags.includes(tag)).length;
+    const sameCat = a.data.category === category ? 1 : 0;
+    return { a, score: sharedTags * 2 + sameCat };
+  })
+  .filter((x) => x.score > 0)
+  .sort((x, y) => y.score - x.score)
+  .slice(0, 3)
+  .map((x) => x.a);
+---
+
+<Layout
+  title={title}
+  description={summary}
+  article
+  pubDate={date}
+  updatedDate={updatedDate}
+  tags={tags}
+>
+  <div class="container article-page">
+    <article class="article-main">
+      <header class="article-header">
+        <a class="back" href="/writing">← {t('writing.title')}</a>
+        <h1 class="article-h1">{title}</h1>
+        <div class="article-meta">
+          <time datetime={date.toISOString()}>{formatDate(date)}</time>
+          <span aria-hidden="true">·</span>
+          <span>{category}</span>
+          <span aria-hidden="true">·</span>
+          <span>{minutes} {t('post.readingTime')}</span>
+          {
+            updatedDate && (
+              <>
+                <span aria-hidden="true">·</span>
+                <span>
+                  {t('post.updated')} {formatDate(updatedDate)}
+                </span>
+              </>
+            )
+          }
+        </div>
+        {
+          tags.length > 0 && (
+            <ul class="tag-list article-tags">
+              {tags.map((tag) => (
+                <li>
+                  <a class="tag" href={`/tags/${encodeURIComponent(tag)}`}>
+                    {tag}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </header>
+
+      <div class="prose">
+        <Content />
+      </div>
+
+      <!-- 分享 -->
+      <div class="post-actions">
+        <button class="btn" id="share-btn" type="button">{t('post.share')}</button>
+      </div>
+
+      <!-- 评论区预留 -->
+      <section class="comment-area" aria-label={t('post.comment')}>
+        <h2 class="comment-title">{t('post.comment')}</h2>
+        <p class="comment-note">{t('post.commentNote')}</p>
+      </section>
+
+      <!-- 上下篇 -->
+      {
+        (prev || next) && (
+          <nav class="post-nav" aria-label="上一篇 / 下一篇">
+            {prev ? (
+              <a class="post-nav-item" href={`/writing/${prev.id}`}>
+                <span class="post-nav-label">{t('post.prev')}</span>
+                <span class="post-nav-title">{prev.data.title}</span>
+              </a>
+            ) : (
+              <span />
+            )}
+            {next ? (
+              <a
+                class="post-nav-item post-nav-next"
+                href={`/writing/${next.id}`}
+              >
+                <span class="post-nav-label">{t('post.next')}</span>
+                <span class="post-nav-title">{next.data.title}</span>
+              </a>
+            ) : (
+              <span />
+            )}
+          </nav>
+        )
+      }
+
+      <!-- 相关阅读 -->
+      {
+        related.length > 0 && (
+          <section class="related">
+            <h2 class="related-title">{t('post.related')}</h2>
+            <ul class="related-list">
+              {related.map((a) => (
+                <li>
+                  <a href={`/writing/${a.id}`}>{a.data.title}</a>
+                  <span class="meta">{formatDateISO(a.data.date)}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+    </article>
+
+    <aside class="article-aside">
+      <Toc headings={headings} />
+    </aside>
+  </div>
+</Layout>
+
+<style>
+  .article-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 15rem;
+    gap: 3rem;
+    padding-top: 2.5rem;
+    align-items: start;
+  }
+
+  .article-main {
+    min-width: 0;
+  }
+
+  .article-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .back {
+    font-size: 0.875rem;
+    color: var(--text-faint);
+  }
+
+  .back:hover {
+    color: var(--accent);
+  }
+
+  .article-h1 {
+    font-size: clamp(1.6rem, 4vw, 2.1rem);
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+    margin-top: 0.75rem;
+  }
+
+  .article-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.9rem;
+    font-size: 0.875rem;
+    color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .article-tags {
+    margin-top: 0.9rem;
+  }
+
+  .post-actions {
+    margin-top: 3rem;
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .comment-area {
+    margin-top: 3rem;
+    padding: 1.5rem;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg-soft);
+  }
+
+  .comment-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .comment-note {
+    font-size: 0.875rem;
+    color: var(--text-soft);
+    line-height: 1.7;
+  }
+
+  .related {
+    margin-top: 3.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-soft);
+  }
+
+  .related-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .related-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .related-list a {
+    color: var(--text);
+  }
+
+  .related-list a:hover {
+    color: var(--accent);
+  }
+
+  .related-list .meta {
+    flex-shrink: 0;
+    font-size: 0.8125rem;
+    color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (max-width: 1024px) {
+    .article-page {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0;
+    }
+
+    .article-aside {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const btn = document.getElementById('share-btn');
+  if (btn) {
+    btn.addEventListener('click', async () => {
+      const url = window.location.href;
+      try {
+        if (navigator.share) {
+          await navigator.share({ title: document.title, url });
+        } else {
+          await navigator.clipboard.writeText(url);
+          const original = btn.textContent;
+          btn.textContent = '链接已复制';
+          setTimeout(() => (btn.textContent = original), 2000);
+        }
+      } catch (e) {
+        /* 用户取消分享，忽略 */
+      }
+    });
+  }
+</script>

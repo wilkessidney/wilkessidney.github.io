@@ -1,0 +1,25 @@
+# 拾光集
+
+> 一个关于量化研究、全栈开发与思考记录的个人站点。写下来，才算是真的想过。
+
+## 关于
+- 关于我: /about/
+
+## 文章
+- 把 MetaTrader 5 接入 MCP 生态: /writing/mt5-mcp/
+- 从过度拟合到正则化：模型的贪婪与克制: /writing/overfitting-regularization/
+- 配对交易与协整：统计套利的第一性原理: /writing/pairs-trading-cointegration/
+- 一人公司的增长飞轮：用内容资产撬动复利: /writing/one-person-flywheel/
+- 用 Astro 重建个人站点: /writing/rebuild-site-with-astro/
+- 读《思考，快与慢》：两个系统与一场认知革命: /writing/thinking-fast-and-slow/
+
+## 作品
+- Polymarket.fans: /works/polymarket-fans/
+- OKX 量化策略: /works/okx-quant/
+- AGE ERP 系统: /works/age-erp/
+
+## 思考
+- 思考碎片: /notes/
+
+## 订阅
+- RSS: /rss.xml

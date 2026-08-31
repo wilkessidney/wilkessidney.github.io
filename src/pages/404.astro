@@ -1,0 +1,35 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { useTranslations } from '../i18n/ui';
+
+const t = useTranslations();
+---
+
+<Layout title={t('error.404.title')} description={t('error.404.desc')} noindex>
+  <section class="section">
+    <div class="container container-narrow notfound">
+      <p class="notfound-code">404</p>
+      <h1 class="page-title">{t('error.404.title')}</h1>
+      <p class="page-desc">{t('error.404.desc')}</p>
+      <a class="btn btn-primary" href="/">{t('error.404.back')}</a>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .notfound {
+    text-align: center;
+    padding-block: 4rem;
+  }
+
+  .notfound-code {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+
+  .notfound .btn {
+    margin-top: 1.75rem;
+  }
+</style>

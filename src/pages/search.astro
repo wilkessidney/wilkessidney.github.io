@@ -1,0 +1,143 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { useTranslations } from '../i18n/ui';
+
+const t = useTranslations();
+---
+
+<Layout title={t('search.title')} description={t('search.desc')} noindex>
+  <section class="section">
+    <div class="container container-narrow">
+      <h1 class="page-title">{t('search.title')}</h1>
+      <p class="page-desc">{t('search.desc')}</p>
+
+      <input
+        id="q"
+        class="search-input"
+        type="search"
+        placeholder={t('search.placeholder')}
+        autocomplete="off"
+        aria-label={t('search.title')}
+      />
+
+      <ul id="results" class="search-results" aria-live="polite"></ul>
+      <p id="hint" class="search-hint">{t('search.hint')}</p>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .search-results {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .search-result {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.15rem;
+    transition: border-color var(--t-fast);
+  }
+
+  .search-result:hover {
+    border-color: var(--accent);
+  }
+
+  .search-result-head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .search-kind {
+    font-size: 0.6875rem;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 4px;
+    padding: 0.05rem 0.4rem;
+  }
+
+  .search-result-title {
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .search-result:hover .search-result-title {
+    color: var(--accent);
+  }
+
+  .search-result-summary {
+    font-size: 0.875rem;
+    color: var(--text-soft);
+    line-height: 1.7;
+  }
+
+  .search-hint {
+    margin-top: 1.25rem;
+    font-size: 0.875rem;
+    color: var(--text-faint);
+  }
+
+  .search-empty {
+    margin-top: 1.25rem;
+    color: var(--text-faint);
+  }
+</style>
+
+<script>
+  const input = document.getElementById('q') as HTMLInputElement;
+  const results = document.getElementById('results') as HTMLUListElement;
+  const hint = document.getElementById('hint') as HTMLParagraphElement;
+  let index: any[] = [];
+
+  fetch('/search-index.json')
+    .then((r) => r.json())
+    .then((d) => (index = d))
+    .catch(() => (hint.textContent = '搜索索引加载失败。'));
+
+  function render(list: any[]) {
+    results.innerHTML = '';
+    if (list.length === 0) {
+      const li = document.createElement('li');
+      li.className = 'search-empty';
+      li.textContent = '没有找到匹配的内容，换个词试试。';
+      results.appendChild(li);
+      return;
+    }
+    hint.style.display = 'none';
+    list.forEach((item) => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.className = 'search-result';
+      a.href = item.url;
+      a.innerHTML = `
+        <div class="search-result-head">
+          <span class="search-kind">${item.type}</span>
+          <span class="search-result-title">${item.title}</span>
+        </div>
+        <p class="search-result-summary">${item.summary}</p>`;
+      li.appendChild(a);
+      results.appendChild(li);
+    });
+  }
+
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    if (!q) {
+      results.innerHTML = '';
+      hint.style.display = '';
+      return;
+    }
+    const list = index.filter((item) => {
+      return (
+        item.title.toLowerCase().includes(q) ||
+        item.summary.toLowerCase().includes(q) ||
+        (item.tags || []).some((tag: string) => tag.toLowerCase().includes(q))
+      );
+    });
+    render(list);
+  });
+</script>

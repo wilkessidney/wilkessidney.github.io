@@ -1,0 +1,94 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatDate } from '../utils/helpers';
+
+interface Props {
+  note: CollectionEntry<'notes'>;
+}
+
+const { note } = Astro.props;
+const { date, tags, image } = note.data;
+// 用正文前若干字作为图片 alt，保证无障碍可读
+const altText = (note.body || '').replace(/\s+/g, ' ').slice(0, 40) || '思考配图';
+---
+
+<article class="note-card">
+  {
+    image && (
+      <div class="note-cover">
+        <img src={image} alt={altText} loading="lazy" width="600" height="400" />
+      </div>
+    )
+  }
+  <div class="note-content">
+    <p class="note-text">{note.body}</p>
+    <div class="note-foot">
+      <time datetime={date.toISOString()}>{formatDate(date)}</time>
+      {
+        tags.length > 0 && (
+          <ul class="tag-list">
+            {tags.map((tag) => (
+              <li>
+                <a class="tag" href={`/tags/${encodeURIComponent(tag)}`}>
+                  {tag}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+  </div>
+</article>
+
+<style>
+  .note-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.4rem 1.5rem;
+    transition: border-color var(--t-base), transform var(--t-base);
+  }
+
+  .note-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .note-cover {
+    aspect-ratio: 3 / 2;
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 1rem;
+    background: var(--bg-soft);
+  }
+
+  .note-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .note-text {
+    color: var(--text);
+    font-size: 0.9875rem;
+    line-height: 1.8;
+    white-space: pre-wrap;
+  }
+
+  .note-foot {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-soft);
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    flex-wrap: wrap;
+    font-size: 0.8125rem;
+    color: var(--text-faint);
+  }
+
+  .note-foot .tag-list {
+    gap: 0.35rem;
+  }
+</style>

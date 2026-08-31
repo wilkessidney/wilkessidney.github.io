@@ -1,0 +1,57 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import { countTags } from '../../utils/helpers';
+import { useTranslations } from '../../i18n/ui';
+
+const t = useTranslations();
+const articles = await getCollection('articles', ({ data }) => !data.draft);
+const works = await getCollection('works');
+const tagCounts = countTags([...articles, ...works]);
+---
+
+<Layout title={t('tags.title')} description={t('tags.desc')}>
+  <section class="section">
+    <div class="container container-narrow">
+      <div class="section-head">
+        <h1 class="page-title">{t('tags.title')}</h1>
+        <p class="page-desc">{t('tags.desc')}</p>
+      </div>
+
+      {
+        tagCounts.length > 0 ? (
+          <ul class="tag-cloud-all">
+            {tagCounts.map(({ tag, count }) => (
+              <li>
+                <a class="tag tag-lg" href={`/tags/${encodeURIComponent(tag)}`}>
+                  {tag} <span class="tag-count">{count}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="empty-state">还没有标签。</p>
+        )
+      }
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .tag-cloud-all {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .tag-lg {
+    font-size: 0.9375rem;
+    padding: 0.35rem 0.9rem;
+  }
+
+  .tag-count {
+    color: var(--text-faint);
+    font-size: 0.75rem;
+    margin-left: 0.25rem;
+  }
+</style>

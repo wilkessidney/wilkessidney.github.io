@@ -1,0 +1,111 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import NoteCard from '../../components/NoteCard.astro';
+import { getCollection } from 'astro:content';
+import { byDateDesc, countTags } from '../../utils/helpers';
+import { useTranslations } from '../../i18n/ui';
+
+const t = useTranslations();
+const notes = byDateDesc(await getCollection('notes'));
+const tagCounts = countTags(notes).slice(0, 16);
+---
+
+<Layout title={t('notes.title')} description={t('notes.desc')}>
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h1 class="page-title">{t('notes.title')}</h1>
+          <p class="page-desc">{t('notes.desc')}</p>
+        </div>
+      </div>
+
+      {
+        tagCounts.length > 0 && (
+          <div class="filter-tags" role="group" aria-label={t('tags.title')}>
+            <button class="chip is-active" data-filter="all" type="button">
+              {t('filter.all')}
+            </button>
+            {tagCounts.map(({ tag }) => (
+              <button class="chip" data-filter={tag} type="button">
+                {tag}
+              </button>
+            ))}
+          </div>
+        )
+      }
+
+      <div class="grid grid-2 notes-list">
+        {
+          notes.map((note) => (
+            <div class="note-wrap" data-tags={note.data.tags.join(',')}>
+              <NoteCard note={note} />
+            </div>
+          ))
+        }
+        {
+          notes.length === 0 && (
+            <p class="empty-state">还没有思考，随手记一句吧。</p>
+          )
+        }
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .filter-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .chip {
+    font-size: 0.875rem;
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--text-soft);
+    background: var(--card);
+    transition: all var(--t-fast);
+  }
+
+  .chip:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .chip.is-active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+  }
+
+  .note-wrap {
+    display: flex;
+  }
+
+  .note-wrap > :global(.note-card) {
+    width: 100%;
+  }
+
+  .note-wrap[hidden] {
+    display: none;
+  }
+</style>
+
+<script>
+  const chips = Array.from(document.querySelectorAll<HTMLButtonElement>('.chip'));
+  const wraps = Array.from(document.querySelectorAll<HTMLElement>('.note-wrap'));
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const filter = chip.dataset.filter;
+      chips.forEach((c) => c.classList.toggle('is-active', c === chip));
+      wraps.forEach((w) => {
+        const tags = (w.dataset.tags || '').split(',');
+        w.hidden = !(filter === 'all' || tags.includes(filter));
+      });
+    });
+  });
+</script>

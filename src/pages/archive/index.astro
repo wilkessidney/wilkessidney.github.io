@@ -1,0 +1,145 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import { byDateDesc, groupBy, formatDateShort } from '../../utils/helpers';
+import { useTranslations } from '../../i18n/ui';
+
+const t = useTranslations();
+
+const articles = byDateDesc(
+  await getCollection('articles', ({ data }) => !data.draft),
+).map((a) => ({
+  type: '文章' as const,
+  title: a.data.title,
+  date: a.data.date,
+  url: `/writing/${a.id}`,
+}));
+
+const works = (await getCollection('works'))
+  .map((w) => ({
+    type: '作品' as const,
+    title: w.data.title,
+    date: new Date(w.data.year, 0, 1),
+    url: `/works/${w.id}`,
+  }))
+  .sort((a, b) => b.date.getTime() - a.date.getTime());
+
+const notes = byDateDesc(await getCollection('notes')).map((n) => ({
+  type: '思考' as const,
+  title: (n.body || '').replace(/\s+/g, ' ').slice(0, 40) || '一条思考',
+  date: n.data.date,
+  url: '/notes',
+}));
+
+const all = [...articles, ...works, ...notes].sort(
+  (a, b) => b.date.getTime() - a.date.getTime(),
+);
+
+const byYear = groupBy(all, (item) => item.date.getFullYear());
+const years = [...byYear.keys()].sort((a, b) => b - a);
+---
+
+<Layout title={t('archive.title')} description={t('archive.desc')}>
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h1 class="page-title">{t('archive.title')}</h1>
+          <p class="page-desc">{t('archive.desc')}</p>
+        </div>
+        <a class="section-more" href="/search">{t('nav.search')} →</a>
+      </div>
+
+      <div class="filters" role="group" aria-label={t('filter.all')}>
+        <button class="chip is-active" data-filter="all" type="button">
+          {t('filter.all')}
+        </button>
+        <button class="chip" data-filter="文章" type="button">文章</button>
+        <button class="chip" data-filter="作品" type="button">作品</button>
+        <button class="chip" data-filter="思考" type="button">思考</button>
+      </div>
+
+      <div class="archive">
+        {
+          years.map((year) => (
+            <div class="archive-year-block" data-year={year}>
+              <h2 class="archive-year">{year}</h2>
+              <ul class="archive-list">
+                {byYear
+                  .get(year)!
+                  .map((item) => (
+                    <li class="archive-row" data-type={item.type}>
+                      <span class="archive-date">
+                        {formatDateShort(item.date)}
+                      </span>
+                      <span class="archive-kind">{item.type}</span>
+                      <a class="archive-title" href={item.url}>
+                        {item.title}
+                      </a>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          ))
+        }
+        {
+          years.length === 0 && (
+            <p class="empty-state">还没有内容可归档。</p>
+          )
+        }
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .chip {
+    font-size: 0.875rem;
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--text-soft);
+    background: var(--card);
+    transition: all var(--t-fast);
+  }
+
+  .chip:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .chip.is-active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+  }
+
+  .archive-year-block + .archive-year-block {
+    margin-top: 2.5rem;
+  }
+
+  .archive-row[hidden] {
+    display: none;
+  }
+</style>
+
+<script>
+  const chips = Array.from(document.querySelectorAll<HTMLButtonElement>('.chip'));
+  const rows = Array.from(document.querySelectorAll<HTMLElement>('.archive-row'));
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const filter = chip.dataset.filter;
+      chips.forEach((c) => c.classList.toggle('is-active', c === chip));
+      rows.forEach((r) => {
+        r.hidden = !(filter === 'all' || r.dataset.type === filter);
+      });
+    });
+  });
+</script>

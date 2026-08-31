@@ -1,0 +1,263 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import { useTranslations } from '../i18n/ui';
+
+const t = useTranslations();
+const [profileEntry] = await getCollection('profile');
+const profile = profileEntry?.data;
+---
+
+<Layout title={t('about.title')} description={profile?.bio}>
+  <section class="section">
+    <div class="container container-narrow about">
+      <header class="about-head">
+        <img
+          class="about-avatar"
+          src={profile?.avatar ?? '/images/avatar.svg'}
+          alt={`${profile?.name ?? '我'} 的头像`}
+          width="120"
+          height="120"
+        />
+        <h1 class="page-title">{profile?.name}</h1>
+        <p class="about-title">{profile?.title}</p>
+        {profile?.location && <p class="about-loc">{profile.location}</p>}
+      </header>
+
+      {
+        profile?.longBio?.length > 0 && (
+          <div class="prose about-bio">
+            {profile.longBio.map((p) => (
+              <p>{p}</p>
+            ))}
+          </div>
+        )
+      }
+
+      {
+        profile?.timeline?.length > 0 && (
+          <section class="about-block">
+            <h2 class="about-h2">经历</h2>
+            <ul class="timeline">
+              {profile.timeline.map((item) => (
+                <li class="timeline-item">
+                  <span class="timeline-period">{item.period}</span>
+                  <div>
+                    <p class="timeline-title">
+                      {item.title}
+                      {item.org && <span class="timeline-org"> · {item.org}</span>}
+                    </p>
+                    {item.description && (
+                      <p class="timeline-desc">{item.description}</p>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+
+      {
+        profile?.skills?.length > 0 && (
+          <section class="about-block">
+            <h2 class="about-h2">技能</h2>
+            <div class="skills">
+              {profile.skills.map((group) => (
+                <div class="skill-group">
+                  <h3 class="skill-group-name">{group.group}</h3>
+                  <ul class="tag-list">
+                    {group.items.map((item) => (
+                      <li>
+                        <span class="tag">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </section>
+        )
+      }
+
+      {
+        profile?.interests?.length > 0 && (
+          <section class="about-block">
+            <h2 class="about-h2">兴趣方向</h2>
+            <ul class="tag-list">
+              {profile.interests.map((item) => (
+                <li>
+                  <span class="tag">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+
+      <section class="about-block">
+        <h2 class="about-h2">联系方式</h2>
+        <ul class="contact-list">
+          {
+            profile?.email && (
+              <li>
+                <span>{t('footer.email')}</span>
+                <a href={`mailto:${profile.email}`}>{profile.email}</a>
+              </li>
+            )
+          }
+          {
+            profile?.socialLinks?.map((link) => (
+              <li>
+                <span>{link.label}</span>
+                <a href={link.url} target="_blank" rel="me noopener noreferrer">
+                  {link.url.startsWith('http') ? link.url : link.label}
+                </a>
+              </li>
+            ))
+          }
+          {
+            profile?.resumeUrl && (
+              <li>
+                <span>简历</span>
+                <a href={profile.resumeUrl} target="_blank" rel="noopener noreferrer">
+                  下载简历
+                </a>
+              </li>
+            )
+          }
+        </ul>
+        <p class="about-note">
+          本站使用 Astro 构建，内容以本地 Markdown 管理，部署于静态托管。无跟踪、无广告。
+        </p>
+      </section>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .about-head {
+    text-align: center;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .about-avatar {
+    width: 7rem;
+    height: 7rem;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    margin: 0 auto 1.25rem;
+  }
+
+  .about-title {
+    color: var(--accent);
+    margin-top: 0.4rem;
+  }
+
+  .about-loc {
+    color: var(--text-faint);
+    font-size: 0.875rem;
+    margin-top: 0.4rem;
+  }
+
+  .about-bio {
+    margin-top: 2rem;
+  }
+
+  .about-block {
+    margin-top: 3rem;
+  }
+
+  .about-h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .timeline-item {
+    display: flex;
+    gap: 1.25rem;
+    align-items: baseline;
+  }
+
+  .timeline-period {
+    flex-shrink: 0;
+    width: 9rem;
+    font-size: 0.8125rem;
+    color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .timeline-title {
+    font-weight: 600;
+  }
+
+  .timeline-org {
+    color: var(--text-soft);
+    font-weight: 400;
+  }
+
+  .timeline-desc {
+    color: var(--text-soft);
+    font-size: 0.9375rem;
+    margin-top: 0.35rem;
+    line-height: 1.7;
+  }
+
+  .skills {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .skill-group-name {
+    font-size: 0.9375rem;
+    color: var(--text-soft);
+    margin-bottom: 0.5rem;
+  }
+
+  .contact-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .contact-list li {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.9375rem;
+  }
+
+  .contact-list li > span:first-child {
+    width: 4rem;
+    flex-shrink: 0;
+    color: var(--text-faint);
+  }
+
+  .about-note {
+    margin-top: 1.5rem;
+    font-size: 0.875rem;
+    color: var(--text-faint);
+    line-height: 1.7;
+  }
+
+  @media (max-width: 640px) {
+    .timeline-item {
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .timeline-period {
+      width: auto;
+    }
+  }
+</style>

@@ -1,0 +1,309 @@
+---
+import { SITE, NAV_LINKS } from '../utils/site';
+import { useTranslations } from '../i18n/ui';
+
+const t = useTranslations();
+const path = Astro.url.pathname;
+
+/** 判断当前导航项是否处于激活状态 */
+function isActive(href: string): boolean {
+  if (href === '/') return path === '/';
+  return path === href || path.startsWith(href + '/');
+}
+
+const brandInitial = SITE.title.slice(0, 1);
+---
+
+<header class="site-header">
+  <div class="container site-header-inner">
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true">{brandInitial}</span>
+      <span>{SITE.title}</span>
+    </a>
+
+    <button
+      class="nav-toggle"
+      type="button"
+      aria-expanded="false"
+      aria-controls="site-nav"
+      aria-label={t('nav.menu')}
+    >
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <path d="M4 7h16M4 12h16M4 17h16"></path>
+      </svg>
+    </button>
+
+    <nav class="site-nav" id="site-nav" aria-label="主导航">
+      <a class="nav-link" href="/" aria-current={isActive('/') ? 'page' : undefined}>
+        {t('nav.home')}
+      </a>
+      {
+        NAV_LINKS.map((link) => (
+          <a
+            class="nav-link"
+            href={link.href}
+            aria-current={isActive(link.href) ? 'page' : undefined}
+          >
+            {link.label}
+          </a>
+        ))
+      }
+      <a class="nav-link" href="/search">{t('nav.search')}</a>
+    </nav>
+
+    <button
+      class="theme-toggle"
+      type="button"
+      aria-label={t('theme.toggle')}
+      title={t('theme.toggle')}
+    >
+      <svg
+        class="icon-sun"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.7"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <circle cx="12" cy="12" r="4.2"></circle>
+        <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"></path>
+      </svg>
+      <svg
+        class="icon-moon"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.7"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5z"></path>
+      </svg>
+    </button>
+
+    <div class="accent-picker">
+      <button
+        class="accent-btn"
+        type="button"
+        aria-label="切换主题色"
+        aria-expanded="false"
+        aria-controls="accent-menu"
+        title="切换主题色"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.7"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="2.4"></circle>
+          <circle cx="12" cy="5.2" r="1.5"></circle>
+          <circle cx="18.2" cy="9.5" r="1.5"></circle>
+          <circle cx="16" cy="17" r="1.5"></circle>
+          <circle cx="8" cy="17" r="1.5"></circle>
+          <circle cx="5.8" cy="9.5" r="1.5"></circle>
+        </svg>
+      </button>
+      <div class="accent-menu" id="accent-menu" role="menu" aria-label="选择主题色" hidden>
+        <button class="swatch" type="button" role="menuitemradio" aria-label="蓝色" aria-checked="false" data-accent="#58a6ff" data-soft="rgba(88,166,255,.12)" data-ring="rgba(88,166,255,.35)" style="--sw:#58a6ff"></button>
+        <button class="swatch" type="button" role="menuitemradio" aria-label="绿色" aria-checked="false" data-accent="#3fb950" data-soft="rgba(63,185,80,.12)" data-ring="rgba(63,185,80,.35)" style="--sw:#3fb950"></button>
+        <button class="swatch" type="button" role="menuitemradio" aria-label="紫色" aria-checked="false" data-accent="#a371f7" data-soft="rgba(163,113,247,.12)" data-ring="rgba(163,113,247,.35)" style="--sw:#a371f7"></button>
+        <button class="swatch" type="button" role="menuitemradio" aria-label="橙色" aria-checked="false" data-accent="#db6d28" data-soft="rgba(219,109,40,.12)" data-ring="rgba(219,109,40,.35)" style="--sw:#db6d28"></button>
+        <button class="swatch" type="button" role="menuitemradio" aria-label="红色" aria-checked="false" data-accent="#f85149" data-soft="rgba(248,81,73,.12)" data-ring="rgba(248,81,73,.35)" style="--sw:#f85149"></button>
+        <button class="swatch" type="button" role="menuitemradio" aria-label="青色" aria-checked="false" data-accent="#39c5cf" data-soft="rgba(57,197,207,.12)" data-ring="rgba(57,197,207,.35)" style="--sw:#39c5cf"></button>
+        <button class="swatch" type="button" role="menuitemradio" aria-label="粉色" aria-checked="false" data-accent="#db61a2" data-soft="rgba(219,97,162,.12)" data-ring="rgba(219,97,162,.35)" style="--sw:#db61a2"></button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<style>
+  .accent-picker {
+    position: relative;
+    flex-shrink: 0;
+  }
+  .accent-btn {
+    width: 2.25rem;
+    height: 2.25rem;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    color: var(--text-soft);
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background var(--t-fast), color var(--t-fast);
+  }
+  .accent-btn:hover {
+    background: var(--bg-soft);
+    color: var(--text);
+  }
+  .accent-btn svg {
+    width: 1.15rem;
+    height: 1.15rem;
+  }
+  .accent-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    padding: 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    z-index: 60;
+  }
+  .accent-menu[hidden] {
+    display: none;
+  }
+  .swatch {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background: var(--sw);
+    border: 2px solid var(--card);
+    box-shadow: 0 0 0 1px var(--border-soft);
+    cursor: pointer;
+    padding: 0;
+    transition: transform var(--t-fast);
+  }
+  .swatch:hover {
+    transform: scale(1.14);
+  }
+  .swatch.on {
+    box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--sw);
+  }
+  .swatch:focus-visible {
+    outline: 2px solid var(--accent-ring);
+    outline-offset: 2px;
+  }
+</style>
+
+<script>
+  // 强调色切换：与工作台同族色板，记忆用户选择
+  function setupAccent() {
+    const btn = document.querySelector('.accent-btn');
+    const menu = document.getElementById('accent-menu');
+    if (!btn || !menu) return;
+    const swatches = Array.from(menu.querySelectorAll('.swatch'));
+
+    function apply(accent: string, soft: string, ring: string, persist: boolean) {
+      const r = document.documentElement.style;
+      r.setProperty('--accent', accent);
+      if (soft) r.setProperty('--accent-soft', soft);
+      if (ring) r.setProperty('--accent-ring', ring);
+      swatches.forEach((s) => {
+        const on = s.dataset.accent?.toLowerCase() === accent.toLowerCase();
+        s.classList.toggle('on', on);
+        s.setAttribute('aria-checked', on ? 'true' : 'false');
+      });
+      if (persist) {
+        try {
+          localStorage.setItem('accent', JSON.stringify({ accent, soft, ring }));
+        } catch (e) {
+          /* 忽略 */
+        }
+      }
+    }
+
+    let cur: { accent?: string; soft?: string; ring?: string } | null = null;
+    try {
+      cur = JSON.parse(localStorage.getItem('accent') || 'null');
+    } catch (e) {
+      /* 忽略 */
+    }
+    const def = swatches[0];
+    if (cur && cur.accent) {
+      apply(cur.accent, cur.soft || '', cur.ring || '', false);
+    } else if (def) {
+      apply(def.dataset.accent || '', def.dataset.soft || '', def.dataset.ring || '', false);
+    }
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = menu.hasAttribute('hidden');
+      if (open) {
+        menu.removeAttribute('hidden');
+        btn.setAttribute('aria-expanded', 'true');
+      } else {
+        menu.setAttribute('hidden', '');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+    swatches.forEach((s) => {
+      s.addEventListener('click', () => {
+        apply(s.dataset.accent || '', s.dataset.soft || '', s.dataset.ring || '', true);
+        menu.setAttribute('hidden', '');
+        btn.setAttribute('aria-expanded', 'false');
+      });
+    });
+    document.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement;
+      if (!menu.contains(t) && !btn.contains(t)) {
+        menu.setAttribute('hidden', '');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  // 主题切换：写入 localStorage 并同步到 <html data-theme>
+  function setupTheme() {
+    const btn = document.querySelector<HTMLButtonElement>('.theme-toggle');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      const current = document.documentElement.dataset.theme === 'dark'
+        ? 'dark'
+        : 'light';
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      try {
+        localStorage.setItem('theme', next);
+      } catch (e) {
+        /* 隐私模式下忽略 */
+      }
+    });
+  }
+
+  // 移动端导航展开/收起
+  function setupNav() {
+    const toggle = document.querySelector<HTMLButtonElement>('.nav-toggle');
+    const nav = document.querySelector<HTMLElement>('#site-nav');
+    if (!toggle || !nav) return;
+    toggle.addEventListener('click', () => {
+      const open = nav.dataset.open === 'true';
+      nav.dataset.open = String(!open);
+      toggle.setAttribute('aria-expanded', String(!open));
+    });
+    nav.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).tagName === 'A') {
+        nav.dataset.open = 'false';
+        toggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  setupTheme();
+  setupNav();
+  setupAccent();
+  // Astro 的视图过渡后需要重新绑定
+  document.addEventListener('astro:after-swap', () => {
+    setupTheme();
+    setupNav();
+    setupAccent();
+  });
+</script>

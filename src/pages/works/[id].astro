@@ -1,0 +1,237 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection, render } from 'astro:content';
+import { formatDate, formatDateISO } from '../../utils/helpers';
+import { useTranslations } from '../../i18n/ui';
+
+export async function getStaticPaths() {
+  const works = await getCollection('works');
+  return works.map((work) => ({
+    params: { id: work.id },
+    props: { work },
+  }));
+}
+
+const { work } = Astro.props;
+const { Content } = await render(work);
+const { title, year, summary, type, role, tools, links, tags } = work.data;
+const t = useTranslations();
+
+const all = (await getCollection('works')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+const idx = all.findIndex((w) => w.id === work.id);
+const prev = idx > 0 ? all[idx - 1] : null;
+const next = idx < all.length - 1 ? all[idx + 1] : null;
+---
+
+<Layout title={title} description={summary}>
+  <div class="container work-page">
+    <article class="prose work-main">
+      <header class="work-header">
+        <a class="back" href="/works">← {t('works.title')}</a>
+        <h1 class="work-h1">{title}</h1>
+        <p class="work-lead">{summary}</p>
+      </header>
+
+      <div class="work-body">
+        <Content />
+      </div>
+
+      {
+        (prev || next) && (
+          <nav class="post-nav" aria-label="上一篇 / 下一篇">
+            {prev ? (
+              <a class="post-nav-item" href={`/works/${prev.id}`}>
+                <span class="post-nav-label">{t('post.prev')}</span>
+                <span class="post-nav-title">{prev.data.title}</span>
+              </a>
+            ) : (
+              <span />
+            )}
+            {next ? (
+              <a class="post-nav-item post-nav-next" href={`/works/${next.id}`}>
+                <span class="post-nav-label">{t('post.next')}</span>
+                <span class="post-nav-title">{next.data.title}</span>
+              </a>
+            ) : (
+              <span />
+            )}
+          </nav>
+        )
+      }
+    </article>
+
+    <aside class="work-aside">
+      <dl class="meta-block">
+        <div>
+          <dt>{t('work.year')}</dt>
+          <dd>{year}</dd>
+        </div>
+        <div>
+          <dt>{t('work.type')}</dt>
+          <dd>{type}</dd>
+        </div>
+        <div>
+          <dt>{t('work.role')}</dt>
+          <dd>{role}</dd>
+        </div>
+        {
+          tools.length > 0 && (
+            <div>
+              <dt>{t('work.tools')}</dt>
+              <dd>
+                <ul class="meta-tags">
+                  {tools.map((tool) => (
+                    <li>{tool}</li>
+                  ))}
+                </ul>
+              </dd>
+            </div>
+          )
+        }
+        {
+          tags.length > 0 && (
+            <div>
+              <dt>{t('tags.title')}</dt>
+              <dd>
+                <ul class="tag-list">
+                  {tags.map((tag) => (
+                    <li>
+                      <a class="tag" href={`/tags/${encodeURIComponent(tag)}`}>
+                        {tag}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </dd>
+            </div>
+          )
+        }
+        {
+          links.length > 0 && (
+            <div>
+              <dt>{t('work.links')}</dt>
+              <dd>
+                <ul class="meta-links">
+                  {links.map((link) => (
+                    <li>
+                      <a href={link.url} target="_blank" rel="noopener noreferrer">
+                        {link.label} ↗
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </dd>
+            </div>
+          )
+        }
+      </dl>
+    </aside>
+  </div>
+</Layout>
+
+<style>
+  .work-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 15rem;
+    gap: 3rem;
+    padding-top: 2.5rem;
+    align-items: start;
+  }
+
+  .work-main {
+    min-width: 0;
+  }
+
+  .work-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .back {
+    font-size: 0.875rem;
+    color: var(--text-faint);
+  }
+
+  .back:hover {
+    color: var(--accent);
+  }
+
+  .work-h1 {
+    font-size: clamp(1.6rem, 4vw, 2.1rem);
+    font-weight: 700;
+    line-height: 1.4;
+    margin-top: 0.75rem;
+  }
+
+  .work-lead {
+    color: var(--text-soft);
+    margin-top: 0.75rem;
+    font-size: 1.05rem;
+  }
+
+  .work-aside {
+    position: sticky;
+    top: 6rem;
+    font-size: 0.875rem;
+  }
+
+  .meta-block {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.35rem;
+    background: var(--card);
+  }
+
+  .meta-block > div {
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .meta-block > div:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .meta-block dt {
+    font-size: 0.75rem;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.3rem;
+  }
+
+  .meta-block dd {
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  .meta-tags,
+  .meta-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    list-style: none;
+  }
+
+  .meta-tags li {
+    color: var(--text-soft);
+  }
+
+  .meta-links a {
+    color: var(--accent);
+  }
+
+  @media (max-width: 1024px) {
+    .work-page {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0;
+    }
+
+    .work-aside {
+      position: static;
+      margin-top: 2.5rem;
+      order: -1;
+    }
+  }
+</style>

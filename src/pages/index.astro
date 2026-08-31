@@ -1,0 +1,231 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import WorkCard from '../components/WorkCard.astro';
+import NoteCard from '../components/NoteCard.astro';
+import { getCollection } from 'astro:content';
+import { byDateDesc, formatDate } from '../utils/helpers';
+import { useTranslations } from '../i18n/ui';
+
+const t = useTranslations();
+
+const [profileEntry] = await getCollection('profile');
+const profile = profileEntry?.data;
+
+const works = (await getCollection('works')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+const featuredWorks = works.filter((w) => w.data.featured).slice(0, 3);
+
+const articles = byDateDesc(
+  await getCollection('articles', ({ data }) => !data.draft),
+).slice(0, 6);
+
+const notes = byDateDesc(await getCollection('notes')).slice(0, 6);
+
+const nowItems: { key: 'reading' | 'learning' | 'building' | 'exploring'; label: string }[] = [
+  { key: 'reading', label: t('now.reading') },
+  { key: 'learning', label: t('now.learning') },
+  { key: 'building', label: t('now.building') },
+  { key: 'exploring', label: t('now.exploring') },
+];
+---
+
+<Layout>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <img
+        class="hero-avatar"
+        src={profile?.avatar ?? '/images/avatar.svg'}
+        alt={`${profile?.name ?? '我'} 的头像`}
+        width="96"
+        height="96"
+      />
+      <div class="hero-text">
+        <h1 class="hero-name">{profile?.name ?? '拾光'}</h1>
+        <p class="hero-title">{profile?.title}</p>
+        <p class="hero-bio">{profile?.bio}</p>
+        {
+          profile?.email && (
+            <a class="hero-contact" href={`mailto:${profile.email}`}>
+              {profile.email}
+            </a>
+          )
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- 精选作品 -->
+  {
+    featuredWorks.length > 0 && (
+      <section class="section">
+        <div class="container">
+          <div class="section-head">
+            <h2 class="section-title">{t('home.featuredWorks')}</h2>
+            <a class="section-more" href="/works">{t('home.viewAll')} →</a>
+          </div>
+          <div class="grid grid-3">
+            {featuredWorks.map((work) => (
+              <WorkCard work={work} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- 最近文章 -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="section-title">{t('home.latestArticles')}</h2>
+        <a class="section-more" href="/writing">{t('home.viewAll')} →</a>
+      </div>
+      <div class="grid grid-2">
+        {articles.map((article) => <ArticleCard article={article} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- 最近思考 -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="section-title">{t('home.recentNotes')}</h2>
+        <a class="section-more" href="/notes">{t('home.viewAll')} →</a>
+      </div>
+      <div class="grid grid-2">
+        {notes.map((note) => <NoteCard note={note} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- 正在进行 -->
+  {
+    profile?.now && (
+      <section class="section">
+        <div class="container container-narrow">
+          <div class="section-head">
+            <h2 class="section-title">{t('home.now')}</h2>
+          </div>
+          <ul class="now-list">
+            {nowItems.map((item) => {
+              const list = profile.now[item.key];
+              return (
+                list.length > 0 && (
+                  <li class="now-item">
+                    <span class="now-label">{item.label}</span>
+                    <ul class="now-items">
+                      {list.map((s) => (
+                        <li>{s}</li>
+                      ))}
+                    </ul>
+                  </li>
+                )
+              );
+            })}
+          </ul>
+          <p class="now-updated">更新于 {formatDate(new Date())}</p>
+        </div>
+      </section>
+    )
+  }
+</Layout>
+
+<style>
+  .hero {
+    padding-block: 3.5rem 2.5rem;
+  }
+
+  .hero-inner {
+    display: flex;
+    gap: 1.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .hero-avatar {
+    width: 6rem;
+    height: 6rem;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+    flex-shrink: 0;
+  }
+
+  .hero-text {
+    flex: 1;
+    min-width: 16rem;
+  }
+
+  .hero-name {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-title {
+    color: var(--accent);
+    font-size: 1rem;
+    margin-top: 0.35rem;
+  }
+
+  .hero-bio {
+    color: var(--text-soft);
+    margin-top: 0.75rem;
+    max-width: 38rem;
+    line-height: 1.8;
+  }
+
+  .hero-contact {
+    display: inline-block;
+    margin-top: 0.9rem;
+    font-size: 0.9375rem;
+    color: var(--accent);
+  }
+
+  .now-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .now-item {
+    display: flex;
+    gap: 1rem;
+    align-items: baseline;
+  }
+
+  .now-label {
+    flex-shrink: 0;
+    width: 3.5rem;
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 0.9375rem;
+  }
+
+  .now-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    color: var(--text-soft);
+  }
+
+  .now-updated {
+    margin-top: 1.5rem;
+    font-size: 0.8125rem;
+    color: var(--text-faint);
+  }
+
+  @media (max-width: 640px) {
+    .hero {
+      padding-block: 2.5rem 1.5rem;
+    }
+    .now-item {
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+  }
+</style>

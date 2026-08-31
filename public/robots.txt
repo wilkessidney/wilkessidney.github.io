@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+
+# 生成式引擎（AI 搜索）爬虫放行，提升 GEO 可见性
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+Sitemap: https://wilkessidney.github.io/sitemap-index.xml

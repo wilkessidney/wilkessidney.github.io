@@ -1,0 +1,76 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import WorkCard from '../../components/WorkCard.astro';
+import { getCollection } from 'astro:content';
+import { byDateDesc } from '../../utils/helpers';
+import { useTranslations } from '../../i18n/ui';
+
+export async function getStaticPaths() {
+  const articles = await getCollection('articles', ({ data }) => !data.draft);
+  const works = await getCollection('works');
+  const tags = new Set<string>();
+  [...articles, ...works].forEach((item) =>
+    item.data.tags.forEach((tag) => tags.add(tag)),
+  );
+  return [...tags].map((tag) => ({
+    params: { tag },
+    props: { tag },
+  }));
+}
+
+const { tag } = Astro.props;
+const t = useTranslations();
+
+const articles = byDateDesc(
+  await getCollection(
+    'articles',
+    ({ data }) => !data.draft && data.tags.includes(tag),
+  ),
+);
+const works = (await getCollection('works', ({ data }) => data.tags.includes(tag)))
+  .slice()
+  .sort((a, b) => a.data.order - b.data.order);
+---
+
+<Layout title={`${tag} · ${t('tags.title')}`} description={`标签「${tag}」下的全部内容`}>
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h1 class="page-title">#{tag}</h1>
+          <p class="page-desc">
+            共 {articles.length + works.length} 条内容
+          </p>
+        </div>
+        <a class="section-more" href="/tags">{t('tags.title')} →</a>
+      </div>
+
+      {
+        works.length > 0 && (
+          <div class="grid grid-3">
+            {works.map((work) => (
+              <WorkCard work={work} />
+            ))}
+          </div>
+        )
+      }
+
+      {
+        articles.length > 0 && (
+          <div class="grid grid-2" style="margin-top:1.25rem">
+            {articles.map((article) => (
+              <ArticleCard article={article} />
+            ))}
+          </div>
+        )
+      }
+
+      {
+        articles.length === 0 && works.length === 0 && (
+          <p class="empty-state">这个标签下还没有内容。</p>
+        )
+      }
+    </div>
+  </section>
+</Layout>

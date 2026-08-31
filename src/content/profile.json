@@ -1,0 +1,74 @@
+{
+  "name": "拾光",
+  "nickname": "拾光",
+  "title": "量化研究员 · 全栈开发者",
+  "bio": "一个人同时做量化策略、产品开发和写作。相信把模糊的想法写清楚，是逼自己真正想明白的唯一办法。这里收着我做过的东西、读过的书，以及中途冒出来的念头。",
+  "longBio": [
+    "我是拾光，一个在代码、数字和文字之间来回切换的人。白天写策略、搭系统，晚上整理当天的笔记与想法。",
+    "过去几年里，我做过预测市场产品、量化研究框架和几个跨境电商工具。它们看起来分散，其实共用同一套底层能力：用工程把研究落地，用写作把经验沉淀。",
+    "这个站点不追求更新频率，也不追逐热点，只希望多年以后回看，能清晰看到自己想问题的轨迹。"
+  ],
+  "avatar": "/images/avatar.svg",
+  "email": "hi@example.com",
+  "location": "上海",
+  "now": {
+    "reading": ["《信号与噪声》—— 纳西姆·尼古拉斯·塔勒布", "《漫步华尔街》—— 伯顿·麦基尔"],
+    "learning": ["PyTorch 从零实现经典网络", "Andrew Ng 机器学习专项课程（C1 阶段）"],
+    "building": ["Polymarket.fans v2.0——预测市场数据平台", "OKX 多因子策略回测框架"],
+    "exploring": ["Agentic AI 在量化研究里的落地", "把 MetaTrader 5 接入 MCP 生态"]
+  },
+  "timeline": [
+    {
+      "period": "2024 – 至今",
+      "title": "独立开发者 / 量化研究",
+      "org": "个人项目",
+      "description": "推进 Polymarket.fans、OKX 量化策略与多个开源工具，内容以本地 Markdown 长期沉淀。"
+    },
+    {
+      "period": "2021 – 2024",
+      "title": "产品经理 / 技术负责人",
+      "org": "互联网公司",
+      "description": "负责跨境与数据类产品，把业务需求翻译成可执行的工程方案。"
+    },
+    {
+      "period": "2017 – 2021",
+      "title": "全栈工程师",
+      "org": "创业团队",
+      "description": "从前端到后端独立完成多条业务线，积累了对系统架构的直觉。"
+    }
+  ],
+  "skills": [
+    {
+      "group": "编程语言",
+      "items": ["Python", "TypeScript", "SQL", "Rust（学习中）"]
+    },
+    {
+      "group": "量化与数据",
+      "items": ["pandas / numpy", "统计套利", "因子研究", "回测框架"]
+    },
+    {
+      "group": "工程与架构",
+      "items": ["FastAPI", "Vue 3", "PostgreSQL", "Docker"]
+    },
+    {
+      "group": "写作与工具",
+      "items": ["Astro", "Markdown", "Obsidian", "Git"]
+    }
+  ],
+  "interests": [
+    "金融数学",
+    "预测市场",
+    "Agentic AI",
+    "认知科学",
+    "长期主义"
+  ],
+  "socialLinks": [
+    { "label": "GitHub", "url": "https://github.com/wilkessidney", "icon": "github" },
+    { "label": "Instagram", "url": "https://instagram.com/wilkessidney", "icon": "instagram" },
+    { "label": "LinkedIn", "url": "https://linkedin.com/in/wilkessidney", "icon": "linkedin" },
+    { "label": "Twitter", "url": "https://twitter.com/wilkessidney", "icon": "twitter" },
+    { "label": "邮箱", "url": "mailto:hi@example.com", "icon": "mail" },
+    { "label": "RSS", "url": "/rss.xml", "icon": "rss" }
+  ],
+  "resumeUrl": ""
+}

@@ -1,0 +1,140 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { getCollection } from 'astro:content';
+import { byDateDesc, countTags } from '../../utils/helpers';
+import { useTranslations } from '../../i18n/ui';
+
+const t = useTranslations();
+const articles = byDateDesc(
+  await getCollection('articles', ({ data }) => !data.draft),
+);
+
+const categories = ['技术', '学习笔记', '读书观影', '长文专题'] as const;
+const tagCounts = countTags(articles).slice(0, 20);
+---
+
+<Layout title={t('writing.title')} description={t('writing.desc')}>
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h1 class="page-title">{t('writing.title')}</h1>
+          <p class="page-desc">{t('writing.desc')}</p>
+        </div>
+      </div>
+
+      <!-- 分类筛选 -->
+      <div class="filters" role="group" aria-label={t('filter.category')}>
+        <button class="chip is-active" data-filter="all" type="button">
+          {t('filter.all')}
+        </button>
+        {
+          categories.map((c) => (
+            <button class="chip" data-filter={c} type="button">
+              {c}
+            </button>
+          ))
+        }
+      </div>
+
+      <!-- 标签云 -->
+      {
+        tagCounts.length > 0 && (
+          <div class="tag-cloud">
+            {tagCounts.map(({ tag }) => (
+              <a class="tag" href={`/tags/${encodeURIComponent(tag)}`}>
+                {tag}
+              </a>
+            ))}
+          </div>
+        )
+      }
+
+      <div class="grid grid-2 article-list">
+        {
+          articles.map((article) => (
+            <div class="article-wrap" data-category={article.data.category}>
+              <ArticleCard article={article} />
+            </div>
+          ))
+        }
+        {
+          articles.length === 0 && (
+            <p class="empty-state">还没有文章，去写一篇吧。</p>
+          )
+        }
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .chip {
+    font-size: 0.875rem;
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--text-soft);
+    background: var(--card);
+    transition: all var(--t-fast);
+  }
+
+  .chip:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .chip.is-active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+  }
+
+  .tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 2rem;
+  }
+
+  .article-list {
+    margin-top: 0.5rem;
+  }
+
+  .article-wrap {
+    display: flex;
+  }
+
+  .article-wrap > :global(.article-card) {
+    width: 100%;
+  }
+
+  .article-wrap[hidden] {
+    display: none;
+  }
+</style>
+
+<script>
+  const chips = Array.from(document.querySelectorAll<HTMLButtonElement>('.chip'));
+  const wraps = Array.from(
+    document.querySelectorAll<HTMLElement>('.article-wrap'),
+  );
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const filter = chip.dataset.filter;
+      chips.forEach((c) => c.classList.toggle('is-active', c === chip));
+      wraps.forEach((w) => {
+        const show = filter === 'all' || w.dataset.category === filter;
+        w.hidden = !show;
+      });
+    });
+  });
+</script>

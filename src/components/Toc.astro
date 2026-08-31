@@ -1,0 +1,66 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+}
+
+const { headings } = Astro.props;
+// 只展示 h2、h3，避免目录过深
+const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
+---
+
+{
+  items.length > 0 && (
+    <nav class="toc" aria-label="目录">
+      <p class="toc-title">目录</p>
+      <ol>
+        {items.map((h) => (
+          <li class={h.depth === 3 ? 'depth-3' : ''}>
+            <a href={`#${h.slug}`}>{h.text}</a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )
+}
+
+<script>
+  // 滚动高亮：用 IntersectionObserver 跟踪当前阅读到的标题
+  function setupToc() {
+    const links = Array.from(
+      document.querySelectorAll<HTMLAnchorElement>('.toc a'),
+    );
+    if (links.length === 0) return;
+    const map = new Map<string, HTMLAnchorElement>();
+    links.forEach((a) => {
+      const id = a.getAttribute('href')?.slice(1);
+      if (id) map.set(id, a);
+    });
+    const headings = Array.from(
+      document.querySelectorAll<HTMLElement>('article h2, article h3'),
+    ).filter((h) => h.id && map.has(h.id));
+    if (headings.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            links.forEach((l) => l.removeAttribute('aria-current'));
+            const a = map.get(entry.target.id);
+            if (a) a.setAttribute('aria-current', 'true');
+          }
+        });
+      },
+      { rootMargin: '-80px 0px -70% 0px', threshold: 0 },
+    );
+    headings.forEach((h) => observer.observe(h));
+  }
+
+  setupToc();
+  document.addEventListener('astro:after-swap', setupToc);
+</script>

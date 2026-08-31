@@ -1,0 +1,109 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import WorkCard from '../../components/WorkCard.astro';
+import { getCollection } from 'astro:content';
+import { useTranslations } from '../../i18n/ui';
+
+const t = useTranslations();
+const works = (await getCollection('works')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+const types = ['项目案例', '设计创作', '实验项目', '过程复盘'] as const;
+---
+
+<Layout title={t('works.title')} description={t('works.desc')}>
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h1 class="page-title">{t('works.title')}</h1>
+          <p class="page-desc">{t('works.desc')}</p>
+        </div>
+      </div>
+
+      <div class="filters" role="group" aria-label={t('filter.type')}>
+        <button class="chip is-active" data-filter="all" type="button">
+          {t('filter.all')}
+        </button>
+        {
+          types.map((ty) => (
+            <button class="chip" data-filter={ty} type="button">
+              {ty}
+            </button>
+          ))
+        }
+      </div>
+
+      <div class="grid grid-3 works-list">
+        {
+          works.map((work) => (
+            <div class="work-wrap" data-type={work.data.type}>
+              <WorkCard work={work} />
+            </div>
+          ))
+        }
+        {
+          works.length === 0 && (
+            <p class="empty-state">还没有作品，去做点什么吧。</p>
+          )
+        }
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .chip {
+    font-size: 0.875rem;
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--text-soft);
+    background: var(--card);
+    transition: all var(--t-fast);
+  }
+
+  .chip:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .chip.is-active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+  }
+
+  .work-wrap {
+    display: flex;
+  }
+
+  .work-wrap > :global(.work-card) {
+    width: 100%;
+  }
+
+  .work-wrap[hidden] {
+    display: none;
+  }
+</style>
+
+<script>
+  const chips = Array.from(document.querySelectorAll<HTMLButtonElement>('.chip'));
+  const wraps = Array.from(document.querySelectorAll<HTMLElement>('.work-wrap'));
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const filter = chip.dataset.filter;
+      chips.forEach((c) => c.classList.toggle('is-active', c === chip));
+      wraps.forEach((w) => {
+        w.hidden = !(filter === 'all' || w.dataset.type === filter);
+      });
+    });
+  });
+</script>
