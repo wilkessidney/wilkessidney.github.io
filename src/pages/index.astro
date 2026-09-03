@@ -2,14 +2,20 @@
 import Layout from '../layouts/Layout.astro';
 import Workbench from '../components/Workbench.astro';
 import { getCollection } from 'astro:content';
+import { byDateDesc } from '../utils/helpers';
 
 const [profileEntry] = await getCollection('profile');
 const profile = profileEntry?.data;
 
+const works = (await getCollection('works')).sort((a, b) => a.data.order - b.data.order);
+const articles = byDateDesc(await getCollection('articles', ({ data }) => !data.draft));
+const notes = byDateDesc(await getCollection('notes'));
+const daily = byDateDesc(await getCollection('daily'));
+
 const title = `${profile?.name ?? '拾光'} · 工作台`;
-const description = '个人工作台：作品、资源与在 build 的东西，一处直达。';
+const description = '个人工作台：作品、文章、思考与每日计划，一处概览。';
 ---
 
 <Layout title={title} description={description}>
-  <Workbench />
+  <Workbench works={works} articles={articles} notes={notes} daily={daily} />
 </Layout>

@@ -24,6 +24,6 @@ export const NAV_LINKS = [
   { label: '作品', href: '/works' },
   { label: '文章', href: '/writing' },
   { label: '思考', href: '/notes' },
-  { label: '归档', href: '/archive' },
+  { label: '归档', href: '/daily' },
   { label: '关于', href: '/about' },
 ] as const;

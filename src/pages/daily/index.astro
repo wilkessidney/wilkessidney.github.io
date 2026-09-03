@@ -1,0 +1,200 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import { byDateDesc, formatDate, formatDateISO } from '../../utils/helpers';
+import { useTranslations } from '../../i18n/ui';
+
+const t = useTranslations();
+const plans = byDateDesc(await getCollection('daily'));
+---
+
+<Layout title={t('daily.title')} description={t('daily.desc')}>
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h1 class="page-title">{t('daily.title')}</h1>
+          <p class="page-desc">{t('daily.desc')}</p>
+        </div>
+      </div>
+
+      <div class="daily-list">
+        {
+          plans.map((plan) => {
+            const doneCount = plan.data.tasks.filter((t) => t.done).length;
+            const total = plan.data.tasks.length;
+            const progress = total > 0 ? Math.round((doneCount / total) * 100) : 0;
+            return (
+              <article class="card daily-card">
+                <div class="daily-header">
+                  <time class="daily-date" datetime={plan.data.date.toISOString()}>
+                    {formatDate(plan.data.date)}
+                  </time>
+                  <span class={`daily-status daily-status-${plan.data.status}`}>
+                    {plan.data.status}
+                  </span>
+                </div>
+
+                {plan.data.summary && <p class="daily-summary">{plan.data.summary}</p>}
+
+                {total > 0 && (
+                  <div class="daily-progress">
+                    <div class="daily-progress-bar" style={`width: ${progress}%`} />
+                    <span class="daily-progress-text">{doneCount}/{total}</span>
+                  </div>
+                )}
+
+                <ul class="daily-tasks">
+                  {plan.data.tasks.map((task) => (
+                    <li class={`daily-task${task.done ? ' is-done' : ''}`}>
+                      <span class="daily-checkbox" aria-hidden="true" />
+                      <span>{task.text}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                {plan.data.tags.length > 0 && (
+                  <ul class="tag-list daily-tags">
+                    {plan.data.tags.map((tag) => (
+                      <li>
+                        <a class="tag" href={`/tags/${encodeURIComponent(tag)}`}>
+                          {tag}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </article>
+            );
+          })
+        }
+        {
+          plans.length === 0 && (
+            <p class="empty-state">还没有日计划，从记录今天开始吧。</p>
+          )
+        }
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .daily-list {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .daily-card {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .daily-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .daily-date {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .daily-status {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--text-soft);
+  }
+
+  .daily-status-已完成,
+  .daily-status-复盘 {
+    color: var(--success, #3fb950);
+    border-color: var(--success, #3fb950);
+  }
+
+  .daily-status-进行中 {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .daily-summary {
+    font-size: 0.9375rem;
+    color: var(--text-soft);
+    line-height: 1.7;
+    margin-bottom: 1rem;
+  }
+
+  .daily-progress {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .daily-progress-bar {
+    height: 6px;
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width 0.3s ease;
+  }
+
+  .daily-progress-text {
+    font-size: 0.75rem;
+    color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .daily-tasks {
+    list-style: none;
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .daily-task {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text);
+  }
+
+  .daily-task.is-done {
+    color: var(--text-faint);
+    text-decoration: line-through;
+  }
+
+  .daily-checkbox {
+    width: 1rem;
+    height: 1rem;
+    border: 1.5px solid var(--border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+  }
+
+  .daily-task.is-done .daily-checkbox {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    position: relative;
+  }
+
+  .daily-task.is-done .daily-checkbox::after {
+    content: '';
+    position: absolute;
+    left: 0.25rem;
+    top: 0.05rem;
+    width: 0.25rem;
+    height: 0.5rem;
+    border: solid var(--accent);
+    border-width: 0 0 1.5px 1.5px;
+    transform: rotate(-45deg);
+  }
+
+  .daily-tags {
+    margin-top: 1rem;
+  }
+</style>

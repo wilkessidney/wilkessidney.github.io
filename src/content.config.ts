@@ -63,6 +63,28 @@ const notes = defineCollection({
 });
 
 /**
+ * 日计划（归档）集合
+ * 文件位置：src/content/daily/*.md
+ * 用于记录每日任务、状态与复盘
+ */
+const daily = defineCollection({
+  loader: glob({ base: './src/content/daily', pattern: '**/*.{md,mdx}' }),
+  schema: z.object({
+    date: z.coerce.date(),
+    /** 当日状态：规划中 / 进行中 / 已完成 / 复盘 */
+    status: z.enum(['规划中', '进行中', '已完成', '复盘']).default('进行中'),
+    /** 重点任务清单 */
+    tasks: z.array(z.object({
+      text: z.string(),
+      done: z.boolean().default(false),
+    })).default([]),
+    /** 一句话总结 */
+    summary: z.string().optional(),
+    tags: z.array(z.string()).default([]),
+  }),
+});
+
+/**
  * 个人资料：单文件 JSON（用 glob 加载，整份 JSON 作为一条数据）
  * 文件位置：src/content/profile.json
  * 注意：file() 加载器会把顶层对象当成「多条记录」，因此这里改用 glob。
@@ -106,4 +128,4 @@ const profile = defineCollection({
   }),
 });
 
-export const collections = { articles, works, notes, profile };
+export const collections = { articles, works, notes, daily, profile };
