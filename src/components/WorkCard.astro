@@ -6,11 +6,18 @@ interface Props {
 }
 
 const { work } = Astro.props;
-const { title, year, summary, cover, type, tags, tools, featured } =
+const { title, year, summary, cover, type, tags, tools, featured, links } =
   work.data;
+
+// 根据链接 URL 推断图标，用于作品卡上直观区分 GitHub / 网站 / 小程序
+function linkIcon(url: string): string {
+  if (/github\.com/i.test(url)) return '⌥'; // 代码仓库
+  if (/mp\.weixin\.qq\.com|weixin|小程序/i.test(url)) return '▢'; // 小程序
+  return '↗'; // 在线访问
+}
 ---
 
-<article class="card card-link work-card">
+<article class="card work-card">
   <a class="work-link" href={`/works/${work.id}`}>
     {
       cover ? (
@@ -58,12 +65,39 @@ const { title, year, summary, cover, type, tags, tools, featured } =
       }
     </div>
   </a>
+
+  {
+    links.length > 0 && (
+      <footer class="work-links">
+        {links.map((link) => (
+          <a
+            class="work-link-chip"
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-kind={/github\.com/i.test(link.url) ? 'github' : /mp\.weixin|小程序/i.test(link.url) ? 'miniprogram' : 'site'}
+          >
+            <span class="work-link-ico" aria-hidden="true">{linkIcon(link.url)}</span>
+            <span>{link.label}</span>
+          </a>
+        ))}
+      </footer>
+    )
+  }
 </article>
 
 <style>
   .work-card {
     padding: 0;
     overflow: hidden;
+    transition: border-color var(--t-base), transform var(--t-base),
+      box-shadow var(--t-base);
+  }
+
+  .work-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
   }
 
   .work-link {
@@ -141,5 +175,40 @@ const { title, year, summary, cover, type, tags, tools, featured } =
 
   .work-tags {
     margin-top: 0.9rem;
+  }
+
+  .work-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0 1.4rem 1.25rem;
+  }
+
+  .work-link-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8125rem;
+    line-height: 1;
+    padding: 0.4rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+    color: var(--text-soft);
+    transition: all var(--t-fast);
+  }
+
+  .work-link-chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .work-link-ico {
+    font-size: 0.9rem;
+  }
+
+  .work-link-chip[data-kind='github'] .work-link-ico {
+    color: var(--accent);
   }
 </style>

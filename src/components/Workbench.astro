@@ -61,17 +61,37 @@ const tabs = [
     <div class="wb-grid wb-grid-3">
       {
         latestWorks.map((work) => (
-          <a class="wb-card wb-card-work" href={`/works/${work.id}`}>
-            <span class="wb-card-dot" style={`--dot-color: var(--accent)`} />
-            <div class="wb-card-body">
-              <h3 class="wb-card-title">{work.data.title}</h3>
-              <p class="wb-card-desc">{work.data.summary}</p>
-            </div>
-            <div class="wb-card-foot">
-              <span class="wb-pill">{work.data.type}</span>
-              <span class="wb-meta">{work.data.year}</span>
-            </div>
-          </a>
+          <div class="wb-card wb-card-work">
+            <a class="wb-card-main" href={`/works/${work.id}`}>
+              <span class="wb-card-dot" style={`--dot-color: var(--accent)`} />
+              <div class="wb-card-body">
+                <h3 class="wb-card-title">{work.data.title}</h3>
+                <p class="wb-card-desc">{work.data.summary}</p>
+              </div>
+              <div class="wb-card-foot">
+                <span class="wb-pill">{work.data.type}</span>
+                <span class="wb-meta">{work.data.year}</span>
+              </div>
+            </a>
+            {
+              work.data.links.length > 0 && (
+                <div class="wb-card-links">
+                  {work.data.links.map((link) => (
+                    <a
+                      class="wb-link-chip"
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onclick="event.stopPropagation()"
+                      data-kind={/github\.com/i.test(link.url) ? 'github' : /mp\.weixin|小程序/i.test(link.url) ? 'miniprogram' : 'site'}
+                    >
+                      {link.label} ↗
+                    </a>
+                  ))}
+                </div>
+              )
+            }
+          </div>
         ))
       }
       {latestWorks.length === 0 && <p class="wb-empty">还没有作品。</p>}
@@ -351,6 +371,60 @@ const tabs = [
 
   .wb-card-dot {
     display: none;
+  }
+
+  /* 作品卡：主链接区 + 外部链接页脚 */
+  .wb-card-work {
+    gap: 0;
+    padding: 0;
+  }
+
+  .wb-card-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    padding: 1.1rem 1.25rem;
+    color: inherit;
+    flex: 1 1 auto;
+  }
+
+  .wb-card-main:hover .wb-card-title {
+    color: var(--accent);
+  }
+
+  .wb-card-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0 1.25rem 1.15rem;
+    border-top: 1px solid var(--border-soft);
+    margin-top: 0.25rem;
+    padding-top: 0.85rem;
+  }
+
+  .wb-link-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.8125rem;
+    line-height: 1;
+    padding: 0.35rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+    color: var(--text-soft);
+    transition: all var(--t-fast);
+  }
+
+  .wb-link-chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .wb-link-chip[data-kind='github'] {
+    border-color: var(--accent-soft);
+    color: var(--accent);
   }
 
   .wb-card-body {
