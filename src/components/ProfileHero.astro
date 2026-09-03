@@ -100,6 +100,9 @@ const interests = profile?.interests ?? [];
     overflow: hidden;
     margin-top: 1.5rem;
     padding: 1.75rem;
+    /* 与下方内容看板同宽（62rem），三区左缘对齐成一条线 */
+    max-width: 62rem;
+    margin-inline: auto;
     background: linear-gradient(
       135deg,
       color-mix(in srgb, var(--accent) 7%, var(--card)),

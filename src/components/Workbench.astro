@@ -216,6 +216,9 @@ const tabs = [
 <style is:global>
   .workbench {
     padding: 1.5rem 0 3rem;
+    /* 与 Hero 内容区同宽对齐（62rem），避免看板被拉满整个容器 */
+    max-width: 62rem;
+    margin-inline: auto;
   }
 
   .cb-tabs {
