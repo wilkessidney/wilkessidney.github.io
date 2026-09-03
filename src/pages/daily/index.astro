@@ -16,7 +16,46 @@ const plans = byDateDesc(await getCollection('daily'));
           <h1 class="page-title">{t('daily.title')}</h1>
           <p class="page-desc">{t('daily.desc')}</p>
         </div>
+        <button class="btn btn-primary" id="daily-new-btn" type="button">新建日计划</button>
       </div>
+
+      <form class="daily-form card" id="daily-form" hidden>
+        <h2 class="daily-form-title">新建日计划</h2>
+        <div class="daily-form-grid">
+          <label class="daily-field">
+            <span>日期</span>
+            <input type="date" name="date" required />
+          </label>
+          <label class="daily-field">
+            <span>状态</span>
+            <select name="status" required>
+              <option value="规划中">规划中</option>
+              <option value="进行中" selected>进行中</option>
+              <option value="已完成">已完成</option>
+              <option value="复盘">复盘</option>
+            </select>
+          </label>
+        </div>
+        <label class="daily-field">
+          <span>任务（每行一条，已完成的行前加 [x]）</span>
+          <textarea name="tasks" rows="5" placeholder="- [ ] 重构工作台首页\n- [x] 新增日计划归档\n- [ ] 文章与思考页接入社交功能"></textarea>
+        </label>
+        <label class="daily-field">
+          <span>一句话总结</span>
+          <input type="text" name="summary" placeholder="今天最核心的进展或复盘" />
+        </label>
+        <label class="daily-field">
+          <span>标签（逗号分隔）</span>
+          <input type="text" name="tags" placeholder="站点迭代, 日计划" />
+        </label>
+        <div class="daily-form-actions">
+          <button class="btn" type="button" id="daily-cancel-btn">取消</button>
+          <button class="btn btn-primary" type="submit">生成并下载 Markdown</button>
+        </div>
+        <p class="daily-form-hint">
+          下载后把文件放到 <code>src/content/daily/YYYY-MM-DD.md</code>，提交即可生效。
+        </p>
+      </form>
 
       <div class="daily-list">
         {
@@ -197,4 +236,192 @@ const plans = byDateDesc(await getCollection('daily'));
   .daily-tags {
     margin-top: 1rem;
   }
+
+  .daily-form {
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .daily-form[hidden] {
+    display: none;
+  }
+
+  .daily-form-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .daily-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  @media (max-width: 640px) {
+    .daily-form-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .daily-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.875rem;
+  }
+
+  .daily-field + .daily-field {
+    margin-top: 1rem;
+  }
+
+  .daily-field span {
+    color: var(--text-soft);
+  }
+
+  .daily-field input,
+  .daily-field select,
+  .daily-field textarea {
+    padding: 0.55rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 0.9375rem;
+  }
+
+  .daily-field input:focus,
+  .daily-field select:focus,
+  .daily-field textarea:focus {
+    outline: 2px solid var(--accent-ring);
+    border-color: var(--accent);
+  }
+
+  .daily-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+  }
+
+  .daily-form-hint {
+    margin-top: 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--text-faint);
+  }
+
+  .daily-form-hint code {
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+    background: var(--bg-soft);
+    padding: 0.1rem 0.3rem;
+    border-radius: 4px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all var(--t-fast);
+  }
+
+  .btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+    color: var(--bg);
+  }
 </style>
+
+<script>
+  (function () {
+    const newBtn = document.getElementById('daily-new-btn');
+    const cancelBtn = document.getElementById('daily-cancel-btn');
+    const form = document.getElementById('daily-form') as HTMLFormElement;
+    if (!newBtn || !cancelBtn || !form) return;
+
+    newBtn.addEventListener('click', () => {
+      form.hidden = false;
+      newBtn.hidden = true;
+      const dateInput = form.querySelector<HTMLInputElement>('input[name="date"]');
+      if (dateInput && !dateInput.value) {
+        dateInput.value = new Date().toISOString().slice(0, 10);
+      }
+      form.querySelector<HTMLElement>('input, select, textarea')?.focus();
+    });
+
+    cancelBtn.addEventListener('click', () => {
+      form.hidden = true;
+      newBtn.hidden = false;
+      form.reset();
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const date = String(fd.get('date') || new Date().toISOString().slice(0, 10));
+      const status = String(fd.get('status') || '进行中');
+      const tasksRaw = String(fd.get('tasks') || '').trim();
+      const summary = String(fd.get('summary') || '').trim();
+      const tagsRaw = String(fd.get('tags') || '').trim();
+
+      const tasks = tasksRaw
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => {
+          const done = line.startsWith('[x]') || line.startsWith('- [x]');
+          const text = line.replace(/^(- )?\[[x ]\] ?/i, '').trim();
+          return `  - text: ${text}\n    done: ${done}`;
+        });
+
+      const tags = tagsRaw
+        .split(/[,，]/)
+        .map((t) => t.trim())
+        .filter(Boolean);
+
+      const frontmatter = [
+        '---',
+        `date: ${date}`,
+        `status: ${status}`,
+        tasks.length > 0 ? `tasks:\n${tasks.join('\n')}` : 'tasks: []',
+        summary ? `summary: ${summary}` : '',
+        tags.length > 0 ? `tags: [${tags.join(', ')}]` : '',
+        '---',
+        '',
+      ]
+        .filter(Boolean)
+        .join('\n');
+
+      const blob = new Blob([frontmatter], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${date}.md`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      form.hidden = true;
+      newBtn.hidden = false;
+      form.reset();
+    });
+  })();
+</script>
