@@ -9,11 +9,12 @@ interface Props {
 
 const { profile, counts } = Astro.props;
 
+// 统计卡片：点击直达下方内容看板对应分类
 const stats = [
-  { n: counts.works, label: '作品' },
-  { n: counts.articles, label: '文章' },
-  { n: counts.notes, label: '思考' },
-  { n: counts.daily, label: '日计划' },
+  { n: counts.works, label: '作品', tab: 'works', hint: '项目与产品' },
+  { n: counts.articles, label: '文章', tab: 'writing', hint: '长文与教程' },
+  { n: counts.notes, label: '思考', tab: 'notes', hint: '碎片与想法' },
+  { n: counts.daily, label: '日计划', tab: 'archive', hint: '计划与复盘' },
 ];
 
 const socials = profile?.socialLinks ?? [];
@@ -21,112 +22,184 @@ const interests = profile?.interests ?? [];
 ---
 
 <section class="hero">
-  <div class="hero-top">
-    {
-      profile?.avatar && (
-        <img
-          class="hero-avatar"
-          src={profile.avatar}
-          alt={`${profile?.name ?? '我'} 的头像`}
-          width="56"
-          height="56"
-          loading="eager"
-        />
-      )
-    }
+  <div class="hero-grid">
+    <!-- 左：身份 -->
     <div class="hero-id">
-      <h1 class="hero-name">{profile?.name ?? '拾光'}</h1>
-      {profile?.title && <div class="hero-title">{profile.title}</div>}
+      <div class="hero-top">
+        {
+          profile?.avatar && (
+            <img
+              class="hero-avatar"
+              src={profile.avatar}
+              alt={`${profile?.name ?? '我'} 的头像`}
+              width="72"
+              height="72"
+              loading="eager"
+            />
+          )
+        }
+        <div class="hero-name-wrap">
+          <h1 class="hero-name">{profile?.name ?? '拾光'}</h1>
+          {profile?.title && (
+            <div class="hero-title">
+              <span class="hero-title-dot" aria-hidden="true" />
+              {profile.title}
+            </div>
+          )}
+        </div>
+      </div>
+
       {profile?.bio && <p class="hero-bio">{profile.bio}</p>}
+
+      {
+        interests.length > 0 && (
+          <div class="hero-tags">
+            {interests.map((item) => (
+              <span class="hero-tag">{item}</span>
+            ))}
+          </div>
+        )
+      }
+
+      {
+        socials.length > 0 && (
+          <div class="hero-social">
+            {socials.map((s) => (
+              <a
+                class="hero-social-link"
+                href={s.url}
+                target={s.url.startsWith('mailto:') ? undefined : '_blank'}
+                rel="noopener noreferrer"
+              >
+                {s.label ?? s.platform}
+              </a>
+            ))}
+          </div>
+        )
+      }
+    </div>
+
+    <!-- 右：统计卡片，点击直达内容看板 -->
+    <div class="hero-stats" role="group" aria-label="内容统计">
+      {
+        stats.map((s) => (
+          <button class="hero-stat" type="button" data-tab={s.tab}>
+            <span class="hero-stat-n">{s.n}</span>
+            <span class="hero-stat-label">{s.label}</span>
+            <span class="hero-stat-hint">{s.hint}</span>
+          </button>
+        ))
+      }
     </div>
   </div>
-
-  {
-    interests.length > 0 && (
-      <div class="hero-tags">
-        {interests.map((item) => (
-          <span class="hero-tag">{item}</span>
-        ))}
-      </div>
-    )
-  }
-
-  <div class="hero-stats">
-    {
-      stats.map((s) => (
-        <div class="hero-stat">
-          <b>{s.n}</b>
-          {s.label}
-        </div>
-      ))
-    }
-  </div>
-
-  {
-    socials.length > 0 && (
-      <div class="hero-social">
-        {socials.map((s) => (
-          <a
-            class="hero-social-link"
-            href={s.url}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {s.label ?? s.platform}
-          </a>
-        ))}
-      </div>
-    )
-  }
 </section>
 
 <style>
   .hero {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
     margin-top: 1.5rem;
+    padding: 2rem;
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--accent) 7%, var(--card)),
+      var(--card) 48%
+    );
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius-lg) + 4px);
   }
 
+  /* 右上角装饰光晕 */
+  .hero::before {
+    content: '';
+    position: absolute;
+    width: 360px;
+    height: 360px;
+    right: -140px;
+    top: -180px;
+    border-radius: 50%;
+    background: radial-gradient(
+      closest-side,
+      color-mix(in srgb, var(--accent) 16%, transparent),
+      transparent
+    );
+    pointer-events: none;
+  }
+
+  /* 左下角装饰光晕 */
+  .hero::after {
+    content: '';
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    left: -120px;
+    bottom: -160px;
+    border-radius: 50%;
+    background: radial-gradient(
+      closest-side,
+      color-mix(in srgb, #a371f7 10%, transparent),
+      transparent
+    );
+    pointer-events: none;
+  }
+
+  .hero-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  /* ---- 左：身份 ---- */
   .hero-top {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
+    gap: 1.1rem;
   }
 
   .hero-avatar {
-    width: 56px;
-    height: 56px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    flex-shrink: 0;
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
     object-fit: cover;
-  }
-
-  .hero-id {
-    min-width: 0;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent);
   }
 
   .hero-name {
-    font-size: 1.1875rem;
-    font-weight: 600;
+    font-size: 1.5rem;
+    font-weight: 700;
     letter-spacing: 0.02em;
     color: var(--text);
+    line-height: 1.25;
   }
 
   .hero-title {
-    color: var(--text-soft);
-    font-size: 0.8125rem;
-    margin-top: 0.15rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: 0.3rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--accent);
+  }
+
+  .hero-title-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
   }
 
   .hero-bio {
+    margin-top: 0.9rem;
+    font-size: 0.9375rem;
+    line-height: 1.75;
     color: var(--text-soft);
-    font-size: 0.875rem;
-    line-height: 1.6;
-    margin-top: 0.4rem;
+    max-width: 34em;
   }
 
   .hero-tags {
@@ -138,63 +211,138 @@ const interests = profile?.interests ?? [];
 
   .hero-tag {
     font-size: 0.75rem;
-    padding: 0.2rem 0.6rem;
+    padding: 0.22rem 0.65rem;
     border-radius: 999px;
-    background: var(--bg-soft);
+    background: color-mix(in srgb, var(--accent) 6%, var(--bg-soft));
     border: 1px solid var(--border-soft);
     color: var(--text-soft);
   }
 
-  .hero-stats {
-    display: flex;
-    gap: 1.4rem;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border);
-    flex-wrap: wrap;
-  }
-
-  .hero-stat {
-    font-size: 0.75rem;
-    color: var(--text-soft);
-  }
-
-  .hero-stat b {
-    display: block;
-    font-size: 1.25rem;
-    color: var(--text);
-    font-weight: 600;
-    line-height: 1.2;
-  }
-
   .hero-social {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.45rem;
     flex-wrap: wrap;
-    margin-top: 0.9rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--border-soft);
   }
 
   .hero-social-link {
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     color: var(--text-soft);
+    background: var(--card);
     border: 1px solid var(--border);
     border-radius: 999px;
-    padding: 0.2rem 0.65rem;
+    padding: 0.3rem 0.8rem;
     transition: all var(--t-fast);
   }
 
   .hero-social-link:hover {
     color: var(--accent);
     border-color: var(--accent);
+    background: var(--accent-soft);
+    transform: translateY(-1px);
   }
 
-  @media (max-width: 640px) {
+  /* ---- 右：统计卡片 ---- */
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem;
+  }
+
+  .hero-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1rem;
+    min-width: 7.5rem;
+    padding: 0.85rem 1rem;
+    text-align: left;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    cursor: pointer;
+    font-family: inherit;
+    transition:
+      border-color var(--t-fast),
+      transform var(--t-fast),
+      box-shadow var(--t-fast);
+  }
+
+  .hero-stat:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+
+  .hero-stat-n {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hero-stat-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .hero-stat-hint {
+    font-size: 0.6875rem;
+    color: var(--text-faint);
+  }
+
+  /* ---- 响应式 ---- */
+  @media (max-width: 860px) {
     .hero {
-      padding: 1.15rem;
+      padding: 1.4rem;
+    }
+
+    .hero-grid {
+      grid-template-columns: 1fr;
+      gap: 1.4rem;
     }
 
     .hero-stats {
-      gap: 1rem;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .hero-stat {
+      min-width: 0;
+      padding: 0.7rem 0.8rem;
+    }
+
+    .hero-stat-hint {
+      display: none;
+    }
+
+    .hero-stat-n {
+      font-size: 1.25rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hero-stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 </style>
+
+<script>
+  // 点击统计卡片：激活下方内容看板对应 Tab 并滚动过去
+  (function setupHeroStats() {
+    const stats = document.querySelectorAll<HTMLButtonElement>('.hero-stat[data-tab]');
+    stats.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tab = document.getElementById(`cb-tab-${btn.dataset.tab}`);
+        tab?.click();
+        document
+          .querySelector('.cb-tabs')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  })();
+</script>
