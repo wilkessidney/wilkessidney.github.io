@@ -240,12 +240,12 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
       }
       try {
         const res = await fetch(
-          `${url}/rest/v1/likes?content_type=eq.${this.dataset.type}&content_id=eq.${encodeURIComponent(this.dataset.id)}&select=count`,
+          `${url}/rest/v1/likes?content_type=eq.${this.dataset.type}&content_id=eq.${encodeURIComponent(this.dataset.id)}&select=id`,
           { headers: { apikey: key, Authorization: `Bearer ${key}` } }
         );
         if (!res.ok) return this.liked ? 1 : 0;
         const data = await res.json();
-        return (data[0]?.count ?? 0) as number;
+        return Array.isArray(data) ? data.length : 0;
       } catch (e) {
         return this.liked ? 1 : 0;
       }
@@ -261,14 +261,12 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
             apikey: key,
             Authorization: `Bearer ${key}`,
             'Content-Type': 'application/json',
-            Prefer: 'resolution=merge-duplicates',
           },
           body: JSON.stringify({
             content_type: this.dataset.type,
             content_id: this.dataset.id,
             title: this.dataset.title,
             url: this.dataset.url,
-            count: 1,
           }),
         });
       } catch (e) {
