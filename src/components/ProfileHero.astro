@@ -99,7 +99,7 @@ const interests = profile?.interests ?? [];
     position: relative;
     overflow: hidden;
     margin-top: 1.5rem;
-    padding: 2rem;
+    padding: 1.75rem;
     background: linear-gradient(
       135deg,
       color-mix(in srgb, var(--accent) 7%, var(--card)),
@@ -146,12 +146,22 @@ const interests = profile?.interests ?? [];
   .hero-grid {
     position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 2rem;
+    /* auto 轨道按内容收缩（min 0 保证窄屏可压缩），消除两栏间的死区 */
+    grid-template-columns: minmax(0, auto) auto;
+    justify-content: center;
+    gap: 1.5rem;
     align-items: center;
+    /* 收窄内容区并居中，避免两栏被拉得过开 */
+    max-width: 62rem;
+    margin-inline: auto;
   }
 
   /* ---- 左：身份 ---- */
+  .hero-id {
+    min-width: 0;
+    max-width: 34rem;
+  }
+
   .hero-top {
     display: flex;
     align-items: center;
