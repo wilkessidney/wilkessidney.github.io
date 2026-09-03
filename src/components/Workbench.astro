@@ -104,10 +104,10 @@ const DEFAULT_DATA = [
       <div class="wb-frow">
         <div class="wb-fi"><label>描述</label><input id="f_desc" type="text" placeholder="一句话说清这是什么" /></div>
       </div>
-      <div class="wb-frow">
-        <div class="wb-fi wb-chk"><input id="f_pin" type="checkbox" /><label for="f_pin">置顶到「每日高频」</label></div>
+      <div class="wb-form-actions">
+        <label class="wb-toggle"><input id="f_pin" type="checkbox" /><span>置顶到「每日高频」</span></label>
+        <button class="wb-btn wb-pri" id="submitBtn" type="submit">添加</button>
       </div>
-      <div class="wb-btns"><button class="wb-btn wb-pri" id="submitBtn" type="submit">添加</button></div>
     </form>
   </section>
 
@@ -122,7 +122,7 @@ const DEFAULT_DATA = [
   </footer>
 </div>
 
-<style>
+<style is:global>
   .wb-hero {
     background: var(--card);
     border: 1px solid var(--border);
@@ -160,21 +160,31 @@ const DEFAULT_DATA = [
   }
   .wb-msg.err { background: rgba(248,81,73,.12); border: 1px solid rgba(248,81,73,.3); color: #f85149; }
 
-  .wb-sec { margin-bottom: 22px; }
-  .wb-sec-h { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .wb-sec { margin-bottom: 24px; }
+  .wb-sec-h { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
   .wb-sec-h h2 { font-size: 15px; font-weight: 600; color: var(--text); }
   .wb-hint { font-size: 12px; color: var(--text-soft); font-weight: 400; }
   .wb-line { flex: 1; height: 1px; background: var(--border); }
 
-  .wb-pins { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }
+  /* 每日高频 */
+  .wb-pins { display: flex; gap: 12px; overflow-x: auto; padding: 4px 2px 10px; }
   .wb-pin {
-    flex: 0 0 auto; min-width: 150px; max-width: 210px;
-    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-    padding: 12px 14px; text-decoration: none; color: var(--text); display: block; transition: border-color .15s;
+    flex: 0 0 auto; width: 184px;
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 16px 14px; text-decoration: none; color: var(--text); display: block;
+    position: relative; overflow: hidden;
+    transition: border-color .15s, transform .15s, box-shadow .15s;
   }
-  .wb-pin:hover { border-color: var(--accent); }
-  .wb-pin .wb-pt { font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
-  .wb-pin .wb-pd { font-size: 11px; color: var(--text-soft); margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .wb-pin::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--pin-color, var(--accent)); opacity: .85;
+  }
+  .wb-pin:hover {
+    border-color: var(--accent); transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(0,0,0,.08);
+  }
+  .wb-pin .wb-pt { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .wb-pin .wb-pd { font-size: 12px; color: var(--text-soft); line-height: 1.45; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   .wb-tabs {
     display: flex; gap: 4px; background: var(--card); border: 1px solid var(--border);
@@ -204,35 +214,49 @@ const DEFAULT_DATA = [
   .wb-chip.on { background: var(--bg-soft); color: var(--text); border-color: var(--border); }
   .wb-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
+  /* 链接列表 */
   .wb-grid { display: grid; gap: 12px; }
   .wb-grid.works { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
   .wb-grid.res { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
-
   .wb-card {
-    background: var(--card); border: 1px solid var(--border); border-radius: 11px;
-    padding: 14px 16px; position: relative; transition: border-color .15s, transform .15s;
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 16px; position: relative;
+    transition: border-color .15s, transform .15s, box-shadow .15s;
   }
-  .wb-card:hover { border-color: var(--border); transform: translateY(-1px); }
-  .wb-card .wb-ct { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
+  .wb-card:hover {
+    border-color: var(--accent); transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(0,0,0,.08);
+  }
+  .wb-card-ops {
+    position: absolute; top: 10px; right: 10px;
+    display: flex; gap: 4px; opacity: 0; transition: opacity .15s;
+  }
+  .wb-card:hover .wb-card-ops { opacity: 1; }
+  .wb-card .wb-ct { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; padding-right: 78px; }
   .wb-card .wb-ct a {
-    color: var(--text); text-decoration: none; font-size: 14px; font-weight: 500; flex: 1;
+    color: var(--text); text-decoration: none; font-size: 14px; font-weight: 600; flex: 1;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   .wb-card .wb-ct a:hover { color: var(--accent); }
-  .wb-card .wb-cd { font-size: 12px; color: var(--text-soft); line-height: 1.5; min-height: 18px; }
-  .wb-card .wb-cf { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--border); }
-  .wb-pill { font-size: 11px; padding: 2px 8px; border-radius: 20px; border: 1px solid var(--border); color: var(--text-soft); }
-  .wb-hits { font-size: 11px; color: var(--text-soft); margin-right: auto; }
-  .wb-ops { display: flex; gap: 6px; }
-  .wb-op {
-    border: 1px solid var(--border); background: transparent; color: var(--text-soft); border-radius: 6px;
-    padding: 2px 8px; font-size: 11px; cursor: pointer; font-family: inherit;
+  .wb-card .wb-cd { font-size: 12px; color: var(--text-soft); line-height: 1.55; min-height: 19px; margin-bottom: 10px; }
+  .wb-card .wb-cf { display: flex; align-items: center; gap: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .wb-pill {
+    font-size: 11px; padding: 3px 9px; border-radius: 20px;
+    border: 1px solid var(--border); color: var(--text-soft); background: var(--bg-soft);
   }
-  .wb-op:hover { color: var(--text); border-color: var(--border); }
-  .wb-op.del:hover { color: #f85149; border-color: #f85149; }
+  .wb-hits { font-size: 11px; color: var(--text-soft); margin-left: auto; }
+  .wb-ops { display: flex; gap: 4px; }
+  .wb-op {
+    border: 1px solid transparent; background: transparent; color: var(--text-soft);
+    border-radius: 6px; padding: 3px 8px; font-size: 11px; cursor: pointer; font-family: inherit;
+    transition: .15s;
+  }
+  .wb-op:hover { background: var(--bg-soft); color: var(--text); }
+  .wb-op.del:hover { color: #f85149; background: rgba(248,81,73,.08); }
 
   .wb-empty { text-align: center; padding: 40px 20px; color: var(--text-soft); font-size: 13px; border: 1px dashed var(--border); border-radius: 11px; }
 
+  /* 添加表单 */
   .wb-form { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 20px; }
   .wb-form-h { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
   .wb-form-h h2 { font-size: 15px; font-weight: 600; color: var(--text); }
@@ -244,8 +268,12 @@ const DEFAULT_DATA = [
     padding: 8px 10px; color: var(--text); font-size: 13px; font-family: inherit; outline: none;
   }
   .wb-fi input:focus, .wb-fi select:focus, .wb-fi textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-ring); }
-  .wb-fi.chk { flex-direction: row; align-items: center; gap: 7px; }
-  .wb-fi.chk input { width: 15px; height: 15px; accent-color: var(--accent); }
+  .wb-form-actions {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 4px; padding-top: 14px; border-top: 1px solid var(--border);
+  }
+  .wb-toggle { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: var(--text-soft); }
+  .wb-toggle input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
   .wb-btns { display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
   .wb-btn {
     padding: 8px 18px; border-radius: 7px; border: 1px solid var(--border); background: var(--bg-soft);
@@ -269,6 +297,9 @@ const DEFAULT_DATA = [
     .wb-hero { padding: 18px; }
     .wb-stats { gap: 16px; }
     .wb-grid.works, .wb-grid.res { grid-template-columns: 1fr; }
+    .wb-card-ops { opacity: 1; position: static; margin-top: 8px; justify-content: flex-end; }
+    .wb-card .wb-ct { padding-right: 0; }
+    .wb-form-actions { flex-direction: column; align-items: stretch; gap: 12px; }
   }
 </style>
 
@@ -343,8 +374,9 @@ const DEFAULT_DATA = [
     var aAttr = local
       ? 'href="#" data-copy="' + esc(u) + '"'
       : 'href="' + esc(u) + '"' + (ext ? ' target="_blank" rel="noopener"' : '') + ' data-hit="' + esc(r._id) + '"';
-    return '<a class="wb-pin" ' + aAttr + '>' +
-      '<div class="wb-pt"><span class="wb-dot" style="background:' + catColor(r.cat) + '"></span>' + esc(r.title) + '</div>' +
+    var catC = catColor(r.cat);
+    return '<a class="wb-pin" ' + aAttr + ' style="--pin-color:' + catC + '">' +
+      '<div class="wb-pt">' + esc(r.title) + '</div>' +
       '<div class="wb-pd">' + esc(r.desc || r.url) + '</div></a>';
   }
   function renderPins() {
@@ -389,13 +421,14 @@ const DEFAULT_DATA = [
     var aAttr = local
       ? 'href="#" data-copy="' + esc(u) + '"'
       : 'href="' + esc(u) + '"' + (ext ? ' target="_blank" rel="noopener"' : '') + ' data-hit="' + id + '"';
+    var catC = catColor(r.cat);
     return '<div class="wb-card">' +
-      '<div class="wb-ct"><span class="wb-dot" style="background:' + catColor(r.cat) + '"></span>' +
+      '<div class="wb-card-ops">' + ops + '</div>' +
+      '<div class="wb-ct"><span class="wb-dot" style="background:' + catC + '"></span>' +
       '<a ' + aAttr + '>' + esc(r.title) + '</a>' + (local ? '<span class="wb-pill">本地</span>' : '') + '</div>' +
       '<div class="wb-cd">' + esc(r.desc || '') + '</div>' +
-      '<div class="wb-cf"><span class="wb-hits">' + esc(r.hits || 0) + ' 次访问</span>' +
-      '<span class="wb-pill">' + esc(r.cat || '未分类') + '</span>' +
-      '<span class="wb-ops">' + ops + '</span></div></div>';
+      '<div class="wb-cf"><span class="wb-pill" style="border-color:' + catC + ';color:' + catC + ';background:' + catC + '10">' + esc(r.cat || '未分类') + '</span>' +
+      '<span class="wb-hits">' + esc(r.hits || 0) + ' 次访问</span></div></div>';
   }
 
   function renderList() {
