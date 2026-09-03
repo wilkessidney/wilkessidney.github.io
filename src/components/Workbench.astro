@@ -28,20 +28,20 @@ const tabs = [
 
 <div class="workbench">
   <!-- 标签切换 -->
-  <div class="wb-tabs" role="tablist" aria-label="工作台分类">
+  <div class="cb-tabs" role="tablist" aria-label="工作台分类">
     {
       tabs.map((tab, idx) => (
         <button
-          class={`wb-tab${idx === 0 ? ' is-active' : ''}`}
+          class={`cb-tab${idx === 0 ? ' is-active' : ''}`}
           role="tab"
           aria-selected={idx === 0 ? 'true' : 'false'}
-          aria-controls={`wb-panel-${tab.id}`}
-          id={`wb-tab-${tab.id}`}
+          aria-controls={`cb-panel-${tab.id}`}
+          id={`cb-tab-${tab.id}`}
           data-tab={tab.id}
           type="button"
         >
-          <span class="wb-tab-label">{tab.label}</span>
-          <span class="wb-tab-count">{tab.count}</span>
+          <span class="cb-tab-label">{tab.label}</span>
+          <span class="cb-tab-count">{tab.count}</span>
         </button>
       ))
     }
@@ -49,36 +49,36 @@ const tabs = [
 
   <!-- 作品 -->
   <section
-    class="wb-panel is-active"
-    id="wb-panel-works"
+    class="cb-panel is-active"
+    id="cb-panel-works"
     role="tabpanel"
-    aria-labelledby="wb-tab-works"
+    aria-labelledby="cb-tab-works"
   >
-    <div class="wb-panel-head">
-      <h2 class="wb-panel-title">{t('home.featuredWorks')}</h2>
-      <a class="wb-panel-more" href="/works">{t('home.viewAll')} →</a>
+    <div class="cb-panel-head">
+      <h2 class="cb-panel-title">{t('home.featuredWorks')}</h2>
+      <a class="cb-panel-more" href="/works">{t('home.viewAll')} →</a>
     </div>
-    <div class="wb-grid wb-grid-3">
+    <div class="cb-grid cb-grid-3">
       {
         latestWorks.map((work) => (
-          <div class="wb-card wb-card-work">
-            <a class="wb-card-main" href={`/works/${work.id}`}>
-              <span class="wb-card-dot" style={`--dot-color: var(--accent)`} />
-              <div class="wb-card-body">
-                <h3 class="wb-card-title">{work.data.title}</h3>
-                <p class="wb-card-desc">{work.data.summary}</p>
+          <div class="cb-card cb-card-work">
+            <a class="cb-card-main" href={`/works/${work.id}`}>
+              <span class="cb-card-dot" style={`--dot-color: var(--accent)`} />
+              <div class="cb-card-body">
+                <h3 class="cb-card-title">{work.data.title}</h3>
+                <p class="cb-card-desc">{work.data.summary}</p>
               </div>
-              <div class="wb-card-foot">
-                <span class="wb-pill">{work.data.type}</span>
-                <span class="wb-meta">{work.data.year}</span>
+              <div class="cb-card-foot">
+                <span class="cb-pill">{work.data.type}</span>
+                <span class="cb-meta">{work.data.year}</span>
               </div>
             </a>
             {
               work.data.links.length > 0 && (
-                <div class="wb-card-links">
+                <div class="cb-card-links">
                   {work.data.links.map((link) => (
                     <a
-                      class="wb-link-chip"
+                      class="cb-link-chip"
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -94,39 +94,39 @@ const tabs = [
           </div>
         ))
       }
-      {latestWorks.length === 0 && <p class="wb-empty">还没有作品。</p>}
+      {latestWorks.length === 0 && <p class="cb-empty">还没有作品。</p>}
     </div>
   </section>
 
   <!-- 文章 -->
   <section
-    class="wb-panel"
-    id="wb-panel-writing"
+    class="cb-panel"
+    id="cb-panel-writing"
     role="tabpanel"
-    aria-labelledby="wb-tab-writing"
+    aria-labelledby="cb-tab-writing"
     hidden
   >
-    <div class="wb-panel-head">
-      <h2 class="wb-panel-title">{t('home.latestArticles')}</h2>
-      <a class="wb-panel-more" href="/writing">{t('home.viewAll')} →</a>
+    <div class="cb-panel-head">
+      <h2 class="cb-panel-title">{t('home.latestArticles')}</h2>
+      <a class="cb-panel-more" href="/writing">{t('home.viewAll')} →</a>
     </div>
-    <div class="wb-grid wb-grid-2">
+    <div class="cb-grid cb-grid-2">
       {
         latestArticles.map((article) => {
           const minutes = article.data.readingTime ?? calcReadingTime(article.body ?? '');
           return (
-            <a class="wb-card wb-card-article" href={`/writing/${article.id}`}>
-              <span class="wb-card-dot" style={`--dot-color: var(--accent)`} />
-              <div class="wb-card-body">
-                <h3 class="wb-card-title">
+            <a class="cb-card cb-card-article" href={`/writing/${article.id}`}>
+              <span class="cb-card-dot" style={`--dot-color: var(--accent)`} />
+              <div class="cb-card-body">
+                <h3 class="cb-card-title">
                   {article.data.title}
-                  {article.data.featured && <span class="wb-badge">精选</span>}
+                  {article.data.featured && <span class="cb-badge">精选</span>}
                 </h3>
-                <p class="wb-card-desc">{article.data.summary}</p>
+                <p class="cb-card-desc">{article.data.summary}</p>
               </div>
-              <div class="wb-card-foot">
-                <span class="wb-pill">{article.data.category}</span>
-                <span class="wb-meta">
+              <div class="cb-card-foot">
+                <span class="cb-pill">{article.data.category}</span>
+                <span class="cb-meta">
                   {formatDateShort(article.data.date)} · {minutes} 分钟
                 </span>
               </div>
@@ -134,81 +134,81 @@ const tabs = [
           );
         })
       }
-      {latestArticles.length === 0 && <p class="wb-empty">还没有文章。</p>}
+      {latestArticles.length === 0 && <p class="cb-empty">还没有文章。</p>}
     </div>
   </section>
 
   <!-- 思考 -->
   <section
-    class="wb-panel"
-    id="wb-panel-notes"
+    class="cb-panel"
+    id="cb-panel-notes"
     role="tabpanel"
-    aria-labelledby="wb-tab-notes"
+    aria-labelledby="cb-tab-notes"
     hidden
   >
-    <div class="wb-panel-head">
-      <h2 class="wb-panel-title">{t('home.recentNotes')}</h2>
-      <a class="wb-panel-more" href="/notes">{t('home.viewAll')} →</a>
+    <div class="cb-panel-head">
+      <h2 class="cb-panel-title">{t('home.recentNotes')}</h2>
+      <a class="cb-panel-more" href="/notes">{t('home.viewAll')} →</a>
     </div>
-    <div class="wb-grid wb-grid-2">
+    <div class="cb-grid cb-grid-2">
       {
         latestNotes.map((note) => (
-          <a class="wb-card wb-card-note" href={`/notes/${note.id}`}>
-            <span class="wb-card-dot" style={`--dot-color: var(--accent)`} />
-            <div class="wb-card-body">
-              <p class="wb-note-text">{note.body}</p>
+          <a class="cb-card cb-card-note" href={`/notes/${note.id}`}>
+            <span class="cb-card-dot" style={`--dot-color: var(--accent)`} />
+            <div class="cb-card-body">
+              <p class="cb-note-text">{note.body}</p>
             </div>
-            <div class="wb-card-foot">
-              <span class="wb-meta">{formatDateShort(note.data.date)}</span>
+            <div class="cb-card-foot">
+              <span class="cb-meta">{formatDateShort(note.data.date)}</span>
               {note.data.tags.length > 0 && (
-                <span class="wb-pill">{note.data.tags[0]}</span>
+                <span class="cb-pill">{note.data.tags[0]}</span>
               )}
             </div>
           </a>
         ))
       }
-      {latestNotes.length === 0 && <p class="wb-empty">还没有思考。</p>}
+      {latestNotes.length === 0 && <p class="cb-empty">还没有思考。</p>}
     </div>
   </section>
 
   <!-- 归档 / 日计划 -->
   <section
-    class="wb-panel"
-    id="wb-panel-archive"
+    class="cb-panel"
+    id="cb-panel-archive"
     role="tabpanel"
-    aria-labelledby="wb-tab-archive"
+    aria-labelledby="cb-tab-archive"
     hidden
   >
-    <div class="wb-panel-head">
-      <h2 class="wb-panel-title">{t('home.recentDaily')}</h2>
-      <a class="wb-panel-more" href="/daily">{t('home.viewAll')} →</a>
+    <div class="cb-panel-head">
+      <h2 class="cb-panel-title">{t('home.recentDaily')}</h2>
+      <a class="cb-panel-more" href="/daily">{t('home.viewAll')} →</a>
     </div>
-    <div class="wb-daily-list">
+    <div class="cb-daily-list">
       {
         latestDaily.map((plan) => {
           const done = plan.data.tasks.filter((task) => task.done).length;
           const total = plan.data.tasks.length;
           const progress = total > 0 ? Math.round((done / total) * 100) : 0;
           return (
-            <a class="wb-card wb-card-daily" href={`/daily`}>
-              <div class="wb-daily-main">
-                <span class="wb-daily-date">{formatDate(plan.data.date)}</span>
-                <span class={`wb-daily-status wb-daily-status-${plan.data.status}`}>
+            <a class="cb-card cb-card-daily" href={`/daily`}>
+              <div class="cb-daily-main">
+                <span class="cb-daily-date">{formatDate(plan.data.date)}</span>
+                <span class={`cb-daily-status cb-daily-status-${plan.data.status}`}>
                   {plan.data.status}
                 </span>
               </div>
-              {plan.data.summary && <p class="wb-daily-summary">{plan.data.summary}</p>}
+              {plan.data.summary && <p class="cb-daily-summary">{plan.data.summary}</p>}
               {total > 0 && (
-                <div class="wb-daily-progress">
-                  <div class="wb-daily-bar" style={`width: ${progress}%`} />
-                  <span class="wb-meta">{done}/{total}</span>
+                <div class="cb-daily-progress">
+                  <div class="cb-daily-bar" style={`width: ${progress}%`} />
+                  <span class="cb-meta">{done}/{total}</span>
                 </div>
               )}
             </a>
           );
         })
       }
-      {latestDaily.length === 0 && <p class="wb-empty">还没有日计划。</p>}
+      {latestDaily.length === 0 && <p class="cb-empty">还没有日计划。</p>}
     </div>
   </section>
 </div>
@@ -218,7 +218,7 @@ const tabs = [
     padding: 1.5rem 0 3rem;
   }
 
-  .wb-tabs {
+  .cb-tabs {
     display: flex;
     gap: 0.5rem;
     margin-bottom: 1.5rem;
@@ -228,11 +228,11 @@ const tabs = [
     scrollbar-width: none;
   }
 
-  .wb-tabs::-webkit-scrollbar {
+  .cb-tabs::-webkit-scrollbar {
     display: none;
   }
 
-  .wb-tab {
+  .cb-tab {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
@@ -247,18 +247,18 @@ const tabs = [
     white-space: nowrap;
   }
 
-  .wb-tab:hover {
+  .cb-tab:hover {
     background: var(--bg-soft);
     color: var(--text);
   }
 
-  .wb-tab.is-active {
+  .cb-tab.is-active {
     background: var(--accent-soft);
     color: var(--accent);
     border-color: var(--accent-soft);
   }
 
-  .wb-tab-count {
+  .cb-tab-count {
     font-size: 0.75rem;
     padding: 0.05rem 0.4rem;
     border-radius: 999px;
@@ -266,21 +266,21 @@ const tabs = [
     color: var(--text-faint);
   }
 
-  .wb-tab.is-active .wb-tab-count {
+  .cb-tab.is-active .cb-tab-count {
     background: var(--card);
     color: var(--accent);
   }
 
-  .wb-panel {
+  .cb-panel {
     display: none;
   }
 
-  .wb-panel.is-active {
+  .cb-panel.is-active {
     display: block;
-    animation: wb-fade-in 0.2s ease;
+    animation: cb-fade-in 0.2s ease;
   }
 
-  @keyframes wb-fade-in {
+  @keyframes cb-fade-in {
     from {
       opacity: 0;
       transform: translateY(4px);
@@ -291,49 +291,49 @@ const tabs = [
     }
   }
 
-  .wb-panel-head {
+  .cb-panel-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 1rem;
   }
 
-  .wb-panel-title {
+  .cb-panel-title {
     font-size: 1.05rem;
     font-weight: 600;
     color: var(--text);
   }
 
-  .wb-panel-more {
+  .cb-panel-more {
     font-size: 0.875rem;
     color: var(--text-soft);
   }
 
-  .wb-panel-more:hover {
+  .cb-panel-more:hover {
     color: var(--accent);
   }
 
-  .wb-grid {
+  .cb-grid {
     display: grid;
     gap: 1rem;
   }
 
-  .wb-grid-2 {
+  .cb-grid-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .wb-grid-3 {
+  .cb-grid-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   @media (max-width: 900px) {
-    .wb-grid-2,
-    .wb-grid-3 {
+    .cb-grid-2,
+    .cb-grid-3 {
       grid-template-columns: 1fr;
     }
   }
 
-  .wb-card {
+  .cb-card {
     display: flex;
     flex-direction: column;
     gap: 0.7rem;
@@ -347,7 +347,7 @@ const tabs = [
     overflow: hidden;
   }
 
-  .wb-card::before {
+  .cb-card::before {
     content: '';
     position: absolute;
     left: 0;
@@ -359,27 +359,27 @@ const tabs = [
     transition: opacity var(--t-fast);
   }
 
-  .wb-card:hover {
+  .cb-card:hover {
     border-color: var(--accent);
     transform: translateY(-2px);
     box-shadow: var(--shadow);
   }
 
-  .wb-card:hover::before {
+  .cb-card:hover::before {
     opacity: 1;
   }
 
-  .wb-card-dot {
+  .cb-card-dot {
     display: none;
   }
 
   /* 作品卡：主链接区 + 外部链接页脚 */
-  .wb-card-work {
+  .cb-card-work {
     gap: 0;
     padding: 0;
   }
 
-  .wb-card-main {
+  .cb-card-main {
     display: flex;
     flex-direction: column;
     gap: 0.7rem;
@@ -388,11 +388,11 @@ const tabs = [
     flex: 1 1 auto;
   }
 
-  .wb-card-main:hover .wb-card-title {
+  .cb-card-main:hover .cb-card-title {
     color: var(--accent);
   }
 
-  .wb-card-links {
+  .cb-card-links {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
@@ -402,7 +402,7 @@ const tabs = [
     padding-top: 0.85rem;
   }
 
-  .wb-link-chip {
+  .cb-link-chip {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
@@ -416,22 +416,22 @@ const tabs = [
     transition: all var(--t-fast);
   }
 
-  .wb-link-chip:hover {
+  .cb-link-chip:hover {
     border-color: var(--accent);
     color: var(--accent);
     background: var(--accent-soft);
   }
 
-  .wb-link-chip[data-kind='github'] {
+  .cb-link-chip[data-kind='github'] {
     border-color: var(--accent-soft);
     color: var(--accent);
   }
 
-  .wb-card-body {
+  .cb-card-body {
     flex: 1 1 auto;
   }
 
-  .wb-card-title {
+  .cb-card-title {
     font-size: 1rem;
     font-weight: 600;
     line-height: 1.45;
@@ -439,11 +439,11 @@ const tabs = [
     margin-bottom: 0.35rem;
   }
 
-  .wb-card:hover .wb-card-title {
+  .cb-card:hover .cb-card-title {
     color: var(--accent);
   }
 
-  .wb-card-desc {
+  .cb-card-desc {
     font-size: 0.875rem;
     line-height: 1.65;
     color: var(--text-soft);
@@ -453,7 +453,7 @@ const tabs = [
     overflow: hidden;
   }
 
-  .wb-note-text {
+  .cb-note-text {
     font-size: 0.9375rem;
     line-height: 1.7;
     color: var(--text);
@@ -464,7 +464,7 @@ const tabs = [
     overflow: hidden;
   }
 
-  .wb-card-foot {
+  .cb-card-foot {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -474,7 +474,7 @@ const tabs = [
     border-top: 1px solid var(--border-soft);
   }
 
-  .wb-pill {
+  .cb-pill {
     font-size: 0.75rem;
     padding: 0.15rem 0.55rem;
     border-radius: 999px;
@@ -483,13 +483,13 @@ const tabs = [
     white-space: nowrap;
   }
 
-  .wb-meta {
+  .cb-meta {
     font-size: 0.8125rem;
     color: var(--text-faint);
     font-variant-numeric: tabular-nums;
   }
 
-  .wb-badge {
+  .cb-badge {
     font-size: 0.6875rem;
     font-weight: 500;
     color: var(--accent);
@@ -500,7 +500,7 @@ const tabs = [
     vertical-align: 0.1em;
   }
 
-  .wb-empty {
+  .cb-empty {
     grid-column: 1 / -1;
     padding: 2rem;
     text-align: center;
@@ -509,30 +509,30 @@ const tabs = [
   }
 
   /* 日计划列表 */
-  .wb-daily-list {
+  .cb-daily-list {
     display: grid;
     gap: 0.85rem;
   }
 
-  .wb-card-daily {
+  .cb-card-daily {
     gap: 0.5rem;
     padding: 0.95rem 1.15rem;
   }
 
-  .wb-daily-main {
+  .cb-daily-main {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
   }
 
-  .wb-daily-date {
+  .cb-daily-date {
     font-size: 0.9375rem;
     font-weight: 600;
     color: var(--text);
   }
 
-  .wb-daily-status {
+  .cb-daily-status {
     font-size: 0.75rem;
     padding: 0.15rem 0.5rem;
     border-radius: 999px;
@@ -540,31 +540,31 @@ const tabs = [
     color: var(--text-soft);
   }
 
-  .wb-daily-status-已完成,
-  .wb-daily-status-复盘 {
+  .cb-daily-status-已完成,
+  .cb-daily-status-复盘 {
     color: var(--success, #3fb950);
     border-color: var(--success, #3fb950);
   }
 
-  .wb-daily-status-进行中 {
+  .cb-daily-status-进行中 {
     color: var(--accent);
     border-color: var(--accent);
   }
 
-  .wb-daily-summary {
+  .cb-daily-summary {
     font-size: 0.875rem;
     color: var(--text-soft);
     line-height: 1.6;
   }
 
-  .wb-daily-progress {
+  .cb-daily-progress {
     display: flex;
     align-items: center;
     gap: 0.6rem;
     margin-top: 0.25rem;
   }
 
-  .wb-daily-bar {
+  .cb-daily-bar {
     height: 5px;
     background: var(--accent);
     border-radius: 999px;
@@ -574,8 +574,8 @@ const tabs = [
 
 <script>
   (function setupWorkbenchTabs() {
-    const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>('.wb-tab'));
-    const panels = Array.from(document.querySelectorAll<HTMLElement>('.wb-panel'));
+    const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>('.cb-tab'));
+    const panels = Array.from(document.querySelectorAll<HTMLElement>('.cb-panel'));
 
     tabs.forEach((tab) => {
       tab.addEventListener('click', () => {
@@ -586,7 +586,7 @@ const tabs = [
           t.setAttribute('aria-selected', String(active));
         });
         panels.forEach((p) => {
-          const active = p.id === `wb-panel-${id}`;
+          const active = p.id === `cb-panel-${id}`;
           p.classList.toggle('is-active', active);
           p.hidden = !active;
         });

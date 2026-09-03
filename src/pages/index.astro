@@ -1,6 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import ProfileHero from '../components/ProfileHero.astro';
 import Workbench from '../components/Workbench.astro';
+import LinkManager from '../components/LinkManager.astro';
 import { getCollection } from 'astro:content';
 import { byDateDesc } from '../utils/helpers';
 
@@ -12,10 +14,24 @@ const articles = byDateDesc(await getCollection('articles', ({ data }) => !data.
 const notes = byDateDesc(await getCollection('notes'));
 const daily = byDateDesc(await getCollection('daily'));
 
+const counts = {
+  works: works.length,
+  articles: articles.length,
+  notes: notes.length,
+  daily: daily.length,
+};
+
 const title = `${profile?.name ?? '拾光'} · 工作台`;
 const description = '个人工作台：作品、文章、思考与每日计划，一处概览。';
 ---
 
 <Layout title={title} description={description}>
+  <!-- 顶部：个人身份 + 四类内容统计 -->
+  <ProfileHero profile={profileEntry?.data} counts={counts} />
+
+  <!-- 内容看板：与顶部导航一致的四类（作品 / 文章 / 思考 / 归档） -->
   <Workbench works={works} articles={articles} notes={notes} daily={daily} />
+
+  <!-- 收藏夹：自建导航链接管理器（置顶 / 搜索 / 分类 / 增删改 / 导入导出） -->
+  <LinkManager />
 </Layout>

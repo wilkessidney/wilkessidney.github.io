@@ -1,0 +1,200 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  profile?: CollectionEntry<'profile'>['data'];
+  /** 顶部统计：作品 / 文章 / 思考 / 日计划 */
+  counts: { works: number; articles: number; notes: number; daily: number };
+}
+
+const { profile, counts } = Astro.props;
+
+const stats = [
+  { n: counts.works, label: '作品' },
+  { n: counts.articles, label: '文章' },
+  { n: counts.notes, label: '思考' },
+  { n: counts.daily, label: '日计划' },
+];
+
+const socials = profile?.socialLinks ?? [];
+const interests = profile?.interests ?? [];
+---
+
+<section class="hero">
+  <div class="hero-top">
+    {
+      profile?.avatar && (
+        <img
+          class="hero-avatar"
+          src={profile.avatar}
+          alt={`${profile?.name ?? '我'} 的头像`}
+          width="56"
+          height="56"
+          loading="eager"
+        />
+      )
+    }
+    <div class="hero-id">
+      <h1 class="hero-name">{profile?.name ?? '拾光'}</h1>
+      {profile?.title && <div class="hero-title">{profile.title}</div>}
+      {profile?.bio && <p class="hero-bio">{profile.bio}</p>}
+    </div>
+  </div>
+
+  {
+    interests.length > 0 && (
+      <div class="hero-tags">
+        {interests.map((item) => (
+          <span class="hero-tag">{item}</span>
+        ))}
+      </div>
+    )
+  }
+
+  <div class="hero-stats">
+    {
+      stats.map((s) => (
+        <div class="hero-stat">
+          <b>{s.n}</b>
+          {s.label}
+        </div>
+      ))
+    }
+  </div>
+
+  {
+    socials.length > 0 && (
+      <div class="hero-social">
+        {socials.map((s) => (
+          <a
+            class="hero-social-link"
+            href={s.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {s.label ?? s.platform}
+          </a>
+        ))}
+      </div>
+    )
+  }
+</section>
+
+<style>
+  .hero {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .hero-top {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .hero-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    object-fit: cover;
+  }
+
+  .hero-id {
+    min-width: 0;
+  }
+
+  .hero-name {
+    font-size: 1.1875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--text);
+  }
+
+  .hero-title {
+    color: var(--text-soft);
+    font-size: 0.8125rem;
+    margin-top: 0.15rem;
+  }
+
+  .hero-bio {
+    color: var(--text-soft);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    margin-top: 0.4rem;
+  }
+
+  .hero-tags {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-top: 0.9rem;
+  }
+
+  .hero-tag {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border-soft);
+    color: var(--text-soft);
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 1.4rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .hero-stat {
+    font-size: 0.75rem;
+    color: var(--text-soft);
+  }
+
+  .hero-stat b {
+    display: block;
+    font-size: 1.25rem;
+    color: var(--text);
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .hero-social {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.9rem;
+  }
+
+  .hero-social-link {
+    font-size: 0.75rem;
+    color: var(--text-soft);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.2rem 0.65rem;
+    transition: all var(--t-fast);
+  }
+
+  .hero-social-link:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  @media (max-width: 640px) {
+    .hero {
+      padding: 1.15rem;
+    }
+
+    .hero-stats {
+      gap: 1rem;
+    }
+  }
+</style>
