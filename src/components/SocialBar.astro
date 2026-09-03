@@ -1,0 +1,355 @@
+---
+interface Props {
+  /** 内容类型，决定 URL 路径与 localStorage key */
+  contentType: 'writing' | 'notes';
+  /** 内容 ID */
+  contentId: string;
+  /** 内容标题，用于分享 */
+  title: string;
+}
+
+const { contentType, contentId, title } = Astro.props;
+const pageUrl = `${Astro.site?.origin ?? ''}/${contentType}/${contentId}`;
+
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || '';
+const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
+---
+
+<script define:vars={{ supabaseUrl, supabaseKey }}>
+  window.__WB_SUPABASE_URL__ = supabaseUrl;
+  window.__WB_SUPABASE_KEY__ = supabaseKey;
+</script>
+
+<div class="social-bar" data-type={contentType} data-id={contentId} data-title={title} data-url={pageUrl}>
+  <button class="social-btn social-like" type="button" aria-pressed="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+    </svg>
+    <span class="social-label">赞</span>
+    <span class="social-count" data-like-count>0</span>
+  </button>
+
+  <button class="social-btn social-repost" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+      <polyline points="16 6 12 2 8 6"></polyline>
+      <line x1="12" y1="2" x2="12" y2="15"></line>
+    </svg>
+    <span class="social-label">转发</span>
+  </button>
+
+  <button class="social-btn social-share" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="18" cy="5" r="3"></circle>
+      <circle cx="6" cy="12" r="3"></circle>
+      <circle cx="18" cy="19" r="3"></circle>
+      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+    </svg>
+    <span class="social-label">分享</span>
+  </button>
+
+  <div class="repost-code" hidden>
+    <span class="repost-code-label">转发码</span>
+    <code class="repost-code-value" data-repost-code></code>
+    <span class="repost-code-hint">已复制到剪贴板</span>
+  </div>
+</div>
+
+<style>
+  .social-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-soft);
+  }
+
+  .social-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text-soft);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all var(--t-fast);
+  }
+
+  .social-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .social-btn.is-active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .social-btn svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .social-count {
+    font-variant-numeric: tabular-nums;
+    min-width: 1ch;
+  }
+
+  .repost-code {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    background: var(--bg-soft);
+    border: 1px dashed var(--border);
+    font-size: 0.875rem;
+    animation: fade-in 0.2s ease;
+  }
+
+  .repost-code[hidden] {
+    display: none;
+  }
+
+  .repost-code-label {
+    color: var(--text-faint);
+  }
+
+  .repost-code-value {
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .repost-code-hint {
+    color: var(--text-faint);
+    font-size: 0.75rem;
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+
+<script>
+  type ContentType = 'writing' | 'notes';
+
+  interface SocialBarDataset {
+    type: ContentType;
+    id: string;
+    title: string;
+    url: string;
+  }
+
+  function hashCode(input: string): string {
+    let hash = 0;
+    for (let i = 0; i < input.length; i++) {
+      const char = input.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash |= 0;
+    }
+    return Math.abs(hash).toString(16).padStart(8, '0');
+  }
+
+  function generateRepostCode(type: ContentType, id: string): string {
+    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const base = `${type}:${id}:${date}`;
+    return `${date.slice(2)}-${hashCode(base).slice(0, 6)}`.toUpperCase();
+  }
+
+  function getSupabaseConfig() {
+    return {
+      url: (window as any).__WB_SUPABASE_URL__ || '',
+      key: (window as any).__WB_SUPABASE_KEY__ || '',
+    };
+  }
+
+  function likeKey(type: ContentType, id: string) {
+    return `wb_like_${type}_${id}`;
+  }
+
+  class SocialBarController {
+    private root: HTMLElement;
+    private dataset: SocialBarDataset;
+    private likeBtn: HTMLButtonElement;
+    private repostBtn: HTMLButtonElement;
+    private shareBtn: HTMLButtonElement;
+    private countEl: HTMLElement;
+    private repostCodeEl: HTMLElement;
+    private codeValueEl: HTMLElement;
+    private liked = false;
+    private count = 0;
+
+    constructor(root: HTMLElement) {
+      this.root = root;
+      const type = root.dataset.type as ContentType;
+      const id = root.dataset.id || '';
+      const title = root.dataset.title || '';
+      const url = root.dataset.url || `${window.location.origin}/${type}/${id}`;
+      this.dataset = { type, id, title, url };
+
+      this.likeBtn = root.querySelector('.social-like') as HTMLButtonElement;
+      this.repostBtn = root.querySelector('.social-repost') as HTMLButtonElement;
+      this.shareBtn = root.querySelector('.social-share') as HTMLButtonElement;
+      this.countEl = root.querySelector('[data-like-count]') as HTMLElement;
+      this.repostCodeEl = root.querySelector('.repost-code') as HTMLElement;
+      this.codeValueEl = root.querySelector('[data-repost-code]') as HTMLElement;
+
+      this.init();
+    }
+
+    private async init() {
+      this.restoreLike();
+      this.count = await this.fetchLikeCount();
+      this.renderLike();
+
+      this.likeBtn.addEventListener('click', () => this.toggleLike());
+      this.repostBtn.addEventListener('click', () => this.doRepost());
+      this.shareBtn.addEventListener('click', () => this.doShare());
+    }
+
+    private restoreLike() {
+      try {
+        this.liked = localStorage.getItem(likeKey(this.dataset.type, this.dataset.id)) === '1';
+      } catch (e) {
+        this.liked = false;
+      }
+    }
+
+    private setLiked(value: boolean) {
+      this.liked = value;
+      try {
+        localStorage.setItem(likeKey(this.dataset.type, this.dataset.id), value ? '1' : '0');
+      } catch (e) {
+        /* 隐私模式忽略 */
+      }
+    }
+
+    private async fetchLikeCount(): Promise<number> {
+      const { url, key } = getSupabaseConfig();
+      if (!url || !key) {
+        return this.liked ? 1 : 0;
+      }
+      try {
+        const res = await fetch(
+          `${url}/rest/v1/likes?content_type=eq.${this.dataset.type}&content_id=eq.${encodeURIComponent(this.dataset.id)}&select=count`,
+          { headers: { apikey: key, Authorization: `Bearer ${key}` } }
+        );
+        if (!res.ok) return this.liked ? 1 : 0;
+        const data = await res.json();
+        return (data[0]?.count ?? 0) as number;
+      } catch (e) {
+        return this.liked ? 1 : 0;
+      }
+    }
+
+    private async postLike() {
+      const { url, key } = getSupabaseConfig();
+      if (!url || !key) return;
+      try {
+        await fetch(`${url}/rest/v1/likes`, {
+          method: 'POST',
+          headers: {
+            apikey: key,
+            Authorization: `Bearer ${key}`,
+            'Content-Type': 'application/json',
+            Prefer: 'resolution=merge-duplicates',
+          },
+          body: JSON.stringify({
+            content_type: this.dataset.type,
+            content_id: this.dataset.id,
+            title: this.dataset.title,
+            url: this.dataset.url,
+            count: 1,
+          }),
+        });
+      } catch (e) {
+        /* 忽略网络错误 */
+      }
+    }
+
+    private async toggleLike() {
+      if (this.liked) {
+        this.setLiked(false);
+        this.count = Math.max(0, this.count - 1);
+      } else {
+        this.setLiked(true);
+        this.count += 1;
+        await this.postLike();
+      }
+      this.renderLike();
+    }
+
+    private renderLike() {
+      this.likeBtn.classList.toggle('is-active', this.liked);
+      this.likeBtn.setAttribute('aria-pressed', String(this.liked));
+      this.countEl.textContent = String(this.count);
+    }
+
+    private async doRepost() {
+      const code = generateRepostCode(this.dataset.type, this.dataset.id);
+      this.codeValueEl.textContent = code;
+      this.repostCodeEl.hidden = false;
+
+      try {
+        await navigator.clipboard.writeText(code);
+      } catch (e) {
+        /* 复制失败则仅显示 */
+      }
+
+      const { url, key } = getSupabaseConfig();
+      if (url && key) {
+        try {
+          await fetch(`${url}/rest/v1/reposts`, {
+            method: 'POST',
+            headers: {
+              apikey: key,
+              Authorization: `Bearer ${key}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              content_type: this.dataset.type,
+              content_id: this.dataset.id,
+              title: this.dataset.title,
+              url: this.dataset.url,
+              code,
+            }),
+          });
+        } catch (e) {
+          /* 忽略 */
+        }
+      }
+    }
+
+    private async doShare() {
+      const shareData = { title: this.dataset.title, url: this.dataset.url };
+      try {
+        if (navigator.share) {
+          await navigator.share(shareData);
+        } else {
+          await navigator.clipboard.writeText(this.dataset.url);
+          const original = this.shareBtn.querySelector('.social-label')?.textContent;
+          const label = this.shareBtn.querySelector('.social-label');
+          if (label) label.textContent = '已复制';
+          setTimeout(() => {
+            if (label && original) label.textContent = original;
+          }, 2000);
+        }
+      } catch (e) {
+        /* 用户取消 */
+      }
+    }
+  }
+
+  document.querySelectorAll<HTMLElement>('.social-bar').forEach((bar) => {
+    new SocialBarController(bar);
+  });
+</script>

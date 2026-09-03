@@ -4,15 +4,19 @@ import { formatDate } from '../utils/helpers';
 
 interface Props {
   note: CollectionEntry<'notes'>;
+  /** 若传入 href，整张卡片会作为链接；否则为普通 article */
+  href?: string;
 }
 
-const { note } = Astro.props;
+const { note, href } = Astro.props;
 const { date, tags, image } = note.data;
 // 用正文前若干字作为图片 alt，保证无障碍可读
 const altText = (note.body || '').replace(/\s+/g, ' ').slice(0, 40) || '思考配图';
+
+const Tag = href ? 'a' : 'article';
 ---
 
-<article class="note-card">
+<Tag class="note-card" {...(href ? { href } : {})}>
   {
     image && (
       <div class="note-cover">
@@ -29,7 +33,7 @@ const altText = (note.body || '').replace(/\s+/g, ' ').slice(0, 40) || '思考�
           <ul class="tag-list">
             {tags.map((tag) => (
               <li>
-                <a class="tag" href={`/tags/${encodeURIComponent(tag)}`}>
+                <a class="tag" href={`/tags/${encodeURIComponent(tag)}`} onclick="event.stopPropagation()">
                   {tag}
                 </a>
               </li>
@@ -39,14 +43,16 @@ const altText = (note.body || '').replace(/\s+/g, ' ').slice(0, 40) || '思考�
       }
     </div>
   </div>
-</article>
+</Tag>
 
 <style>
   .note-card {
+    display: block;
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: 1.4rem 1.5rem;
+    color: inherit;
     transition: border-color var(--t-base), transform var(--t-base);
   }
 

@@ -1,6 +1,8 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import Toc from '../../components/Toc.astro';
+import SocialBar from '../../components/SocialBar.astro';
+import GiscusComments from '../../components/GiscusComments.astro';
 import { getCollection, render } from 'astro:content';
 import { byDateDesc, formatDate, formatDateISO, calcReadingTime } from '../../utils/helpers';
 import { useTranslations } from '../../i18n/ui';
@@ -89,16 +91,9 @@ const related = all
         <Content />
       </div>
 
-      <!-- 分享 -->
-      <div class="post-actions">
-        <button class="btn" id="share-btn" type="button">{t('post.share')}</button>
-      </div>
+      <SocialBar contentType="writing" contentId={article.id} title={title} />
 
-      <!-- 评论区预留 -->
-      <section class="comment-area" aria-label={t('post.comment')}>
-        <h2 class="comment-title">{t('post.comment')}</h2>
-        <p class="comment-note">{t('post.commentNote')}</p>
-      </section>
+      <GiscusComments />
 
       <!-- 上下篇 -->
       {
@@ -200,32 +195,6 @@ const related = all
     margin-top: 0.9rem;
   }
 
-  .post-actions {
-    margin-top: 3rem;
-    display: flex;
-    gap: 0.75rem;
-  }
-
-  .comment-area {
-    margin-top: 3rem;
-    padding: 1.5rem;
-    border: 1px dashed var(--border);
-    border-radius: var(--radius-lg);
-    background: var(--bg-soft);
-  }
-
-  .comment-title {
-    font-size: 1.05rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
-
-  .comment-note {
-    font-size: 0.875rem;
-    color: var(--text-soft);
-    line-height: 1.7;
-  }
-
   .related {
     margin-top: 3.5rem;
     padding-top: 2rem;
@@ -273,23 +242,3 @@ const related = all
   }
 </style>
 
-<script>
-  const btn = document.getElementById('share-btn');
-  if (btn) {
-    btn.addEventListener('click', async () => {
-      const url = window.location.href;
-      try {
-        if (navigator.share) {
-          await navigator.share({ title: document.title, url });
-        } else {
-          await navigator.clipboard.writeText(url);
-          const original = btn.textContent;
-          btn.textContent = '链接已复制';
-          setTimeout(() => (btn.textContent = original), 2000);
-        }
-      } catch (e) {
-        /* 用户取消分享，忽略 */
-      }
-    });
-  }
-</script>

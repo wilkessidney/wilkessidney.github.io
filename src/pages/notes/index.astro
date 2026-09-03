@@ -37,11 +37,11 @@ const tagCounts = countTags(notes).slice(0, 16);
 
       <div class="grid grid-2 notes-list">
         {
-          notes.map((note) => (
-            <div class="note-wrap" data-tags={note.data.tags.join(',')}>
-              <NoteCard note={note} />
-            </div>
-          ))
+        notes.map((note) => (
+          <div class="note-wrap" data-tags={note.data.tags.join(',')}>
+            <NoteCard note={note} href={`/notes/${note.id}`} />
+          </div>
+        ))
         }
         {
           notes.length === 0 && (

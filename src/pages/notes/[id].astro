@@ -1,0 +1,205 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import SocialBar from '../../components/SocialBar.astro';
+import GiscusComments from '../../components/GiscusComments.astro';
+import { getCollection, render } from 'astro:content';
+import { byDateDesc, formatDate } from '../../utils/helpers';
+import { useTranslations } from '../../i18n/ui';
+
+export async function getStaticPaths() {
+  const notes = await getCollection('notes');
+  return notes.map((note) => ({
+    params: { id: note.id },
+    props: { note },
+  }));
+}
+
+const { note } = Astro.props;
+const { Content } = await render(note);
+const { date, tags, image } = note.data;
+const t = useTranslations();
+
+const all = byDateDesc(await getCollection('notes'));
+const idx = all.findIndex((n) => n.id === note.id);
+const prev = idx > 0 ? all[idx - 1] : null;
+const next = idx < all.length - 1 ? all[idx + 1] : null;
+
+const titleText = (note.body || '').replace(/\s+/g, ' ').slice(0, 28) || '一条思考';
+const pageTitle = `${titleText} · ${t('notes.title')}`;
+const description = (note.body || '').replace(/\s+/g, ' ').slice(0, 120);
+---
+
+<Layout title={pageTitle} description={description}>
+  <div class="container note-page">
+    <article class="note-main">
+      <a class="back" href="/notes">← {t('notes.title')}</a>
+
+      {
+        image && (
+          <div class="note-cover">
+            <img src={image} alt="思考配图" loading="eager" width="1200" height="800" />
+          </div>
+        )
+      }
+
+      <div class="note-body">
+        <Content />
+      </div>
+
+      <div class="note-meta">
+        <time datetime={date.toISOString()}>{formatDate(date)}</time>
+        {
+          tags.length > 0 && (
+            <ul class="tag-list note-tags">
+              {tags.map((tag) => (
+                <li>
+                  <a class="tag" href={`/tags/${encodeURIComponent(tag)}`}>
+                    {tag}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </div>
+
+      <SocialBar contentType="notes" contentId={note.id} title={pageTitle} />
+
+      {
+        (prev || next) && (
+          <nav class="post-nav" aria-label="上一条 / 下一条">
+            {prev ? (
+              <a class="post-nav-item" href={`/notes/${prev.id}`}>
+                <span class="post-nav-label">上一条</span>
+                <span class="post-nav-title">
+                  {(prev.body || '').replace(/\s+/g, ' ').slice(0, 24)}…
+                </span>
+              </a>
+            ) : (
+              <span />
+            )}
+            {next ? (
+              <a class="post-nav-item post-nav-next" href={`/notes/${next.id}`}>
+                <span class="post-nav-label">下一条</span>
+                <span class="post-nav-title">
+                  {(next.body || '').replace(/\s+/g, ' ').slice(0, 24)}…
+                </span>
+              </a>
+            ) : (
+              <span />
+            )}
+          </nav>
+        )
+      }
+
+      <GiscusComments />
+    </article>
+  </div>
+</Layout>
+
+<style>
+  .note-page {
+    padding-top: 2.5rem;
+    padding-bottom: 4rem;
+    max-width: 44rem;
+  }
+
+  .back {
+    display: inline-block;
+    font-size: 0.875rem;
+    color: var(--text-faint);
+    margin-bottom: 1.5rem;
+  }
+
+  .back:hover {
+    color: var(--accent);
+  }
+
+  .note-cover {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 1.75rem;
+    background: var(--bg-soft);
+  }
+
+  .note-cover img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .note-body {
+    font-size: 1.05rem;
+    line-height: 1.9;
+    color: var(--text);
+  }
+
+  .note-body :global(p) {
+    margin-bottom: 1.25rem;
+  }
+
+  .note-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-soft);
+    font-size: 0.875rem;
+    color: var(--text-faint);
+  }
+
+  .note-tags {
+    margin: 0;
+  }
+
+  .post-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-soft);
+  }
+
+  .post-nav-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    color: var(--text);
+    transition: border-color var(--t-fast);
+  }
+
+  .post-nav-item:hover {
+    border-color: var(--accent);
+  }
+
+  .post-nav-next {
+    text-align: right;
+  }
+
+  .post-nav-label {
+    font-size: 0.75rem;
+    color: var(--text-faint);
+  }
+
+  .post-nav-title {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 640px) {
+    .post-nav {
+      grid-template-columns: 1fr;
+    }
+
+    .post-nav-next {
+      text-align: left;
+    }
+  }
+</style>
