@@ -40,31 +40,28 @@ function linkIcon(url: string): string {
 
       <h3 class="work-title">{title}</h3>
       <p class="work-summary">{summary}</p>
-
-      {
-        (tags.length > 0 || tools.length > 0) && (
-          <ul class="tag-list work-tags">
-            {tools.slice(0, 3).map((tool) => (
-              <li>
-                <span class="tag">{tool}</span>
-              </li>
-            ))}
-            {tags.slice(0, 3).map((tag) => (
-              <li>
-                <a
-                  class="tag"
-                  href={`/tags/${encodeURIComponent(tag)}`}
-                  onclick="event.stopPropagation()"
-                >
-                  {tag}
-                </a>
-              </li>
-            ))}
-          </ul>
-        )
-      }
     </div>
   </a>
+
+  <!-- 标签放在主链接外：卡内不能再嵌 <a>，否则 DOM 会被浏览器解析器撕碎 -->
+  {
+    (tags.length > 0 || tools.length > 0) && (
+      <ul class="tag-list work-tags">
+        {tools.slice(0, 3).map((tool) => (
+          <li>
+            <span class="tag">{tool}</span>
+          </li>
+        ))}
+        {tags.slice(0, 3).map((tag) => (
+          <li>
+            <a class="tag" href={`/tags/${encodeURIComponent(tag)}`}>
+              {tag}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
 
   {
     links.length > 0 && (
@@ -174,7 +171,12 @@ function linkIcon(url: string): string {
   }
 
   .work-tags {
-    margin-top: 0.9rem;
+    margin: 0.2rem 1.4rem 1rem;
+  }
+
+  /* 无链接页脚时，标签块自己提供底部留白 */
+  .work-card > .work-tags:last-child {
+    margin-bottom: 1.25rem;
   }
 
   .work-links {

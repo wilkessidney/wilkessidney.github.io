@@ -4,7 +4,7 @@ import { formatDate } from '../utils/helpers';
 
 interface Props {
   note: CollectionEntry<'notes'>;
-  /** 若传入 href，整张卡片会作为链接；否则为普通 article */
+  /** 若传入 href，整张卡片通过拉伸链接可点；否则为纯展示 */
   href?: string;
 }
 
@@ -12,11 +12,15 @@ const { note, href } = Astro.props;
 const { date, tags, image } = note.data;
 // 用正文前若干字作为图片 alt，保证无障碍可读
 const altText = (note.body || '').replace(/\s+/g, ' ').slice(0, 40) || '思考配图';
-
-const Tag = href ? 'a' : 'article';
 ---
 
-<Tag class="note-card" {...(href ? { href } : {})}>
+<!--
+  注意：卡片根节点必须是 <article>，不能是 <a>。
+  卡内还有标签 <a>，若外层也是 <a>，浏览器解析到内层链接会强制闭合外层，
+  DOM 会被撕碎成大量空卡片（此前 /notes 页 8 条笔记炸成 40 张卡的根因）。
+  整卡可点改用「拉伸链接」：透明的 <a.note-stretch> 铺满卡片，标签提高层级保持可点。
+-->
+<article class="note-card">
   {
     image && (
       <div class="note-cover">
@@ -33,7 +37,7 @@ const Tag = href ? 'a' : 'article';
           <ul class="tag-list">
             {tags.map((tag) => (
               <li>
-                <a class="tag" href={`/tags/${encodeURIComponent(tag)}`} onclick="event.stopPropagation()">
+                <a class="tag" href={`/tags/${encodeURIComponent(tag)}`}>
                   {tag}
                 </a>
               </li>
@@ -43,22 +47,40 @@ const Tag = href ? 'a' : 'article';
       }
     </div>
   </div>
-</Tag>
+
+  {href && <a class="note-stretch" href={href} aria-hidden="true" tabindex="-1" />}
+</article>
 
 <style>
   .note-card {
+    position: relative;
     display: block;
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: 1.4rem 1.5rem;
     color: inherit;
-    transition: border-color var(--t-base), transform var(--t-base);
+    transition: border-color var(--t-base), transform var(--t-base), box-shadow var(--t-base);
   }
 
   .note-card:hover {
     border-color: var(--accent);
     transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+
+  /* 拉伸链接：透明铺满整卡，让卡片整体可点 */
+  .note-stretch {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  /* 标签与时间提高层级，不被拉伸链接挡住 */
+  .note-foot .tag,
+  .note-foot time {
+    position: relative;
+    z-index: 1;
   }
 
   .note-cover {
