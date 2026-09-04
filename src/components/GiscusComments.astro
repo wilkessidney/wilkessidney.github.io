@@ -1,23 +1,18 @@
 ---
 /**
- * Giscus 评论组件
+ * Giscus 评论组件（基于 GitHub Discussions）
  *
- * 使用方式：
- * 1. 前往 https://giscus.app/zh-CN 生成配置，拿到 repo / repoId / category / categoryId
- * 2. 在 .env 或构建时注入：
- *    PUBLIC_GISCUS_REPO=用户名/仓库
- *    PUBLIC_GISCUS_REPO_ID=...
- *    PUBLIC_GISCUS_CATEGORY=Announcements
- *    PUBLIC_GISCUS_CATEGORY_ID=...
- * 3. 重新构建即可加载评论区
- *
- * 未配置时显示占位提示。
+ * 配置已通过 GitHub GraphQL API 自动完成（2026-09-04）：
+ * - 仓库已开启 Discussions，分类 Announcements（仅维护者可发起，访客可评论）
+ * - 以下四个值均为公开信息（会明文出现在客户端 bundle 中，giscus 设计如此），
+ *   故直接作为默认值内置，本地与 GitHub Actions 构建均生效；
+ *   仍可用 .env 中的 PUBLIC_GISCUS_* 变量覆盖。
  */
 
-const repo = import.meta.env.PUBLIC_GISCUS_REPO || '';
-const repoId = import.meta.env.PUBLIC_GISCUS_REPO_ID || '';
+const repo = import.meta.env.PUBLIC_GISCUS_REPO || 'wilkessidney/wilkessidney.github.io';
+const repoId = import.meta.env.PUBLIC_GISCUS_REPO_ID || 'R_kgDOUJw_gg';
 const category = import.meta.env.PUBLIC_GISCUS_CATEGORY || 'Announcements';
-const categoryId = import.meta.env.PUBLIC_GISCUS_CATEGORY_ID || '';
+const categoryId = import.meta.env.PUBLIC_GISCUS_CATEGORY_ID || 'DIC_kwDOUJw_gs4DE2EY';
 const configured = !!(repo && repoId && categoryId);
 ---
 
