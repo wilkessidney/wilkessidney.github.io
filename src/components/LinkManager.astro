@@ -13,20 +13,19 @@ const CATS = [
   { k: '内容输出', c: '#f778ba' },
 ];
 
-// 首次访问的默认数据：把导航站与博客「搞成一套」——
-// 作品层=三个项目，资源层=博客各板块，一处直达。
+// 首次访问的默认数据：与顶部导航一致的三层——作品 / 文章 / 思考。
 const DEFAULT_DATA = [
-  { _id: 'seed_polymarket', title: 'Polymarket.fans', url: '/works/polymarket-fans', layer: '作品层', cat: '预测市场', desc: '预测市场数据平台', status: '已发布', pin: true, hits: 0, created: '2026-08-31' },
-  { _id: 'seed_okx', title: 'OKX 量化策略研究系统', url: '/works/okx-quant', layer: '作品层', cat: '量化研究', desc: '多因子策略回测框架', status: '已发布', pin: true, hits: 0, created: '2026-08-31' },
-  { _id: 'seed_age', title: 'AGE ERP 系统', url: '/works/age-erp', layer: '作品层', cat: 'AI 全栈', desc: '亚马逊 ERP 工具', status: '已发布', pin: false, hits: 0, created: '2026-08-31' },
-  { _id: 'seed_writing', title: '文章', url: '/writing', layer: '资源层', cat: '内容输出', desc: '量化、全栈与读书笔记', status: '已发布', pin: false, hits: 0, created: '2026-08-31' },
-  { _id: 'seed_notes', title: '思考', url: '/notes', layer: '资源层', cat: '内容输出', desc: '日常想法与碎片', status: '已发布', pin: false, hits: 0, created: '2026-08-31' },
-  { _id: 'seed_works', title: '作品', url: '/works', layer: '资源层', cat: 'AI 全栈', desc: '做过的事', status: '已发布', pin: false, hits: 0, created: '2026-08-31' },
-  { _id: 'seed_archive', title: '日计划', url: '/daily', layer: '资源层', cat: '内容输出', desc: '每日计划与复盘', status: '已发布', pin: false, hits: 0, created: '2026-08-31' },
-  { _id: 'seed_about', title: '关于', url: '/about', layer: '资源层', cat: '学习成长', desc: '我是谁', status: '已发布', pin: false, hits: 0, created: '2026-08-31' },
-  { _id: 'seed_search', title: '搜索', url: '/search', layer: '资源层', cat: 'AI 全栈', desc: '站内检索', status: '已发布', pin: false, hits: 0, created: '2026-08-31' },
-  { _id: 'seed_rss', title: 'RSS', url: '/rss.xml', layer: '资源层', cat: '内容输出', desc: '订阅更新', status: '已发布', pin: false, hits: 0, created: '2026-08-31' },
-  { _id: 'seed_github', title: 'GitHub', url: 'https://github.com/wilkessidney', layer: '资源层', cat: 'AI 全栈', desc: '源码仓库', status: '已发布', pin: false, hits: 0, created: '2026-08-31' },
+  { _id: 'seed_polymarket', title: 'Polymarket.fans', url: '/works/polymarket-fans', layer: '作品', cat: '预测市场', desc: '预测市场数据平台', status: '已发布', pin: true, hits: 0, created: '2026-08-31' },
+  { _id: 'seed_okx', title: 'OKX 量化策略研究系统', url: '/works/okx-quant', layer: '作品', cat: '量化研究', desc: '多因子策略回测框架', status: '已发布', pin: true, hits: 0, created: '2026-08-31' },
+  { _id: 'seed_age', title: 'AGE ERP 系统', url: '/works/age-erp', layer: '作品', cat: 'AI 全栈', desc: '亚马逊 ERP 工具', status: '已发布', pin: false, hits: 0, created: '2026-08-31' },
+  { _id: 'seed_works', title: '作品', url: '/works', layer: '作品', cat: 'AI 全栈', desc: '做过的事', status: '已发布', pin: false, hits: 0, created: '2026-08-31' },
+  { _id: 'seed_github', title: 'GitHub', url: 'https://github.com/wilkessidney', layer: '作品', cat: 'AI 全栈', desc: '源码仓库', status: '已发布', pin: false, hits: 0, created: '2026-08-31' },
+  { _id: 'seed_writing', title: '文章', url: '/writing', layer: '文章', cat: '内容输出', desc: '量化、全栈与读书笔记', status: '已发布', pin: false, hits: 0, created: '2026-08-31' },
+  { _id: 'seed_rss', title: 'RSS', url: '/rss.xml', layer: '文章', cat: '内容输出', desc: '订阅更新', status: '已发布', pin: false, hits: 0, created: '2026-08-31' },
+  { _id: 'seed_notes', title: '思考', url: '/notes', layer: '思考', cat: '内容输出', desc: '日常想法与碎片', status: '已发布', pin: false, hits: 0, created: '2026-08-31' },
+  { _id: 'seed_archive', title: '日计划', url: '/daily', layer: '思考', cat: '内容输出', desc: '每日计划与复盘', status: '已发布', pin: false, hits: 0, created: '2026-08-31' },
+  { _id: 'seed_about', title: '关于', url: '/about', layer: '思考', cat: '学习成长', desc: '我是谁', status: '已发布', pin: false, hits: 0, created: '2026-08-31' },
+  { _id: 'seed_search', title: '搜索', url: '/search', layer: '思考', cat: 'AI 全栈', desc: '站内检索', status: '已发布', pin: false, hits: 0, created: '2026-08-31' },
 ];
 ---
 
@@ -38,9 +37,9 @@ const DEFAULT_DATA = [
       <span class="wb-line"></span>
     </div>
     <div class="wb-stats">
-      <div class="wb-stat"><b id="s1">0</b>作品层</div>
-      <div class="wb-stat"><b id="s2">0</b>资源层</div>
-      <div class="wb-stat"><b id="s3">0</b>待整理</div>
+      <div class="wb-stat"><b id="s1">0</b>作品</div>
+      <div class="wb-stat"><b id="s2">0</b>文章</div>
+      <div class="wb-stat"><b id="s3">0</b>思考</div>
       <div class="wb-stat"><b id="s4">0</b>全部</div>
     </div>
   </section>
@@ -58,9 +57,9 @@ const DEFAULT_DATA = [
 
   <section class="wb-sec">
     <div class="wb-tabs">
-      <button class="wb-tab on" data-tab="作品层">作品层<span class="wb-n" id="n1"></span></button>
-      <button class="wb-tab" data-tab="资源层">资源层<span class="wb-n" id="n2"></span></button>
-      <button class="wb-tab" data-tab="收件箱">收件箱<span class="wb-n" id="n3"></span></button>
+      <button class="wb-tab on" data-tab="作品">作品<span class="wb-n" id="n1"></span></button>
+      <button class="wb-tab" data-tab="文章">文章<span class="wb-n" id="n2"></span></button>
+      <button class="wb-tab" data-tab="思考">思考<span class="wb-n" id="n3"></span></button>
     </div>
     <div class="wb-bar">
       <input class="wb-search" id="q" type="text" placeholder="搜索标题或描述…" autocomplete="off" />
@@ -80,8 +79,14 @@ const DEFAULT_DATA = [
         <div class="wb-fi"><label>链接 *</label><input id="f_url" type="url" required placeholder="https://… 或 /writing" /></div>
       </div>
       <div class="wb-frow">
-        <div class="wb-fi"><label>层级</label><select id="f_layer"><option>作品层</option><option selected>资源层</option></select></div>
-        <div class="wb-fi"><label>分类</label><select id="f_cat"></select></div>
+        <div class="wb-fi"><label>层级</label><select id="f_layer"><option>作品</option><option>文章</option><option selected>思考</option></select></div>
+        <div class="wb-fi"><label>分类</label>
+          <div class="wb-cat-row">
+            <select id="f_cat"></select>
+            <button type="button" class="wb-addcat" id="addCatBtn" title="新增分类">＋</button>
+            <input id="f_newcat" type="text" placeholder="新分类名 · 回车添加" maxlength="12" style="display:none" />
+          </div>
+        </div>
         <div class="wb-fi"><label>状态</label><select id="f_status"><option>已发布</option><option>待整理</option></select></div>
       </div>
       <div class="wb-frow">
@@ -258,6 +263,15 @@ const DEFAULT_DATA = [
     padding: 8px 10px; color: var(--text); font-size: 13px; font-family: inherit; outline: none;
   }
   .wb-fi input:focus, .wb-fi select:focus, .wb-fi textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-ring); }
+  .wb-cat-row { display: flex; gap: 6px; align-items: center; }
+  .wb-cat-row select, .wb-cat-row input { flex: 1; min-width: 0; }
+  .wb-addcat {
+    flex: 0 0 auto; width: 34px; height: 34px; border-radius: 7px;
+    border: 1px dashed var(--border); background: var(--bg-soft); color: var(--text-soft);
+    font-size: 15px; cursor: pointer; font-family: inherit; line-height: 1; transition: .15s;
+  }
+  .wb-addcat:hover { border-color: var(--accent); color: var(--accent); }
+
   .wb-form-actions {
     display: flex; align-items: center; justify-content: space-between;
     margin-top: 4px; padding-top: 14px; border-top: 1px solid var(--border);
@@ -296,7 +310,9 @@ const DEFAULT_DATA = [
 <script define:vars={{ DEFAULT_DATA, CATS }}>
   var LS_KEY = 'wb_links_v1';
   var DRAFT_KEY = 'wb_draft_v1';
-  var STATE = { all: [], tab: '作品层', cat: '全部', q: '', editingId: null };
+  var CATS_KEY = 'wb_cats_v1';
+  var NEW_CAT_COLORS = ['#f778ba', '#58a6ff', '#3fb950', '#d29922', '#a371f7', '#ff7b72', '#79c0ff'];
+  var STATE = { all: [], tab: '作品', cat: '全部', q: '', editingId: null };
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -314,6 +330,30 @@ const DEFAULT_DATA = [
   function saveLocal(rows) {
     try { localStorage.setItem(LS_KEY, JSON.stringify(rows)); } catch (e) {}
   }
+  // 老版本 localStorage 数据的层级迁移：作品层→作品，资源层→文章，未知→思考
+  function migrateLayers(rows) {
+    var map = { '作品层': '作品', '资源层': '文章' };
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i];
+      if (map[r.layer]) r.layer = map[r.layer];
+      if (['作品', '文章', '思考'].indexOf(r.layer) < 0) r.layer = '思考';
+    }
+    return rows;
+  }
+  function loadCustomCats() {
+    try { var v = JSON.parse(localStorage.getItem(CATS_KEY) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; }
+  }
+  function saveCustomCats(list) { try { localStorage.setItem(CATS_KEY, JSON.stringify(list)); } catch (e) {} }
+  function addCustomCat(name) {
+    name = String(name || '').trim();
+    if (!name) return false;
+    for (var i = 0; i < CATS.length; i++) { if (CATS[i].k === name) { toast('分类「' + name + '」已存在', 'err'); return false; } }
+    var c = { k: name, c: NEW_CAT_COLORS[loadCustomCats().length % NEW_CAT_COLORS.length] };
+    var list = loadCustomCats(); list.push(c); saveCustomCats(list);
+    CATS.push(c); fillCatOptions(); renderChips(); $('f_cat').value = name;
+    toast('已新增分类「' + name + '」');
+    return true;
+  }
 
   function saveDraft() {
     try {
@@ -328,7 +368,8 @@ const DEFAULT_DATA = [
     try {
       var d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); if (!d) return;
       $('f_title').value = d.t || ''; $('f_url').value = d.u || '';
-      $('f_layer').value = d.l || '资源层'; $('f_cat').value = d.c || CATS[0].k;
+      $('f_layer').value = ['作品', '文章', '思考'].indexOf(d.l) >= 0 ? d.l : '文章';
+      $('f_cat').value = d.c || CATS[0].k;
       $('f_desc').value = d.d || ''; $('f_status').value = d.s || '已发布';
       $('f_pin').checked = !!d.p;
     } catch (e) {}
@@ -348,15 +389,15 @@ const DEFAULT_DATA = [
   }
 
   function renderStats() {
-    var w = 0, s = 0, p = 0;
+    var w = 0, a = 0, t = 0;
     for (var i = 0; i < STATE.all.length; i++) {
       var r = STATE.all[i];
-      if (!published(r)) { p++; }
-      else if (r.layer === '作品层') { w++; }
-      else { s++; }
+      if (r.layer === '作品') { w++; }
+      else if (r.layer === '文章') { a++; }
+      else { t++; }
     }
-    $('s1').textContent = w; $('s2').textContent = s; $('s3').textContent = p; $('s4').textContent = STATE.all.length;
-    $('n1').textContent = w; $('n2').textContent = s; $('n3').textContent = p;
+    $('s1').textContent = w; $('s2').textContent = a; $('s3').textContent = t; $('s4').textContent = STATE.all.length;
+    $('n1').textContent = w; $('n2').textContent = a; $('n3').textContent = t;
   }
 
   function pinHtml(r) {
@@ -390,8 +431,7 @@ const DEFAULT_DATA = [
   function visible() {
     var q = STATE.q.trim().toLowerCase();
     return STATE.all.filter(function (r) {
-      if (STATE.tab === '收件箱') { if (published(r)) return false; }
-      else { if (!published(r)) return false; if (r.layer !== STATE.tab) return false; }
+      if (r.layer !== STATE.tab) return false;
       if (STATE.cat !== '全部' && r.cat !== STATE.cat) return false;
       if (q) { var t = (r.title || '') + ' ' + (r.desc || '') + ' ' + (r.cat || ''); if (t.toLowerCase().indexOf(q) < 0) return false; }
       return true;
@@ -424,7 +464,7 @@ const DEFAULT_DATA = [
   function renderList() {
     var rows = visible(), box = $('list');
     if (!rows.length) { box.innerHTML = '<div class="wb-empty">这里还没有内容 · 用下方表单添加第一条</div>'; return; }
-    var cls = STATE.tab === '作品层' ? 'wb-grid works' : 'wb-grid res';
+    var cls = STATE.tab === '作品' ? 'wb-grid works' : 'wb-grid res';
     box.innerHTML = '<div class="' + cls + '">' + rows.map(cardHtml).join('') + '</div>';
   }
 
@@ -462,7 +502,8 @@ const DEFAULT_DATA = [
     var r = findRow(id); if (!r) return;
     STATE.editingId = id; fillCatOptions();
     $('f_title').value = r.title || ''; $('f_url').value = r.url || '';
-    $('f_layer').value = r.layer || '资源层'; $('f_cat').value = r.cat || CATS[0].k;
+    $('f_layer').value = ['作品', '文章', '思考'].indexOf(r.layer) >= 0 ? r.layer : '文章';
+    $('f_cat').value = r.cat || CATS[0].k;
     $('f_desc').value = r.desc || ''; $('f_status').value = r.status || '已发布';
     $('f_pin').checked = !!r.pin;
     $('formT').textContent = '编辑 · ' + r.title; $('submitBtn').textContent = '保存修改';
@@ -541,6 +582,25 @@ const DEFAULT_DATA = [
 
     $('addForm').addEventListener('input', saveDraft);
 
+    $('addCatBtn').addEventListener('click', function () {
+      $('f_cat').style.display = 'none'; this.style.display = 'none';
+      var inp = $('f_newcat'); inp.style.display = ''; inp.focus();
+    });
+    function closeNewCat() {
+      $('f_cat').style.display = ''; $('addCatBtn').style.display = '';
+      var inp = $('f_newcat'); inp.style.display = 'none'; inp.value = '';
+    }
+    $('f_newcat').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (addCustomCat(this.value)) saveDraft();
+        closeNewCat();
+      } else if (e.key === 'Escape') {
+        closeNewCat();
+      }
+    });
+    $('f_newcat').addEventListener('blur', function () { setTimeout(closeNewCat, 120); });
+
     $('addForm').addEventListener('submit', function (e) {
       e.preventDefault();
       var data = readForm(); if (!data) return;
@@ -582,9 +642,11 @@ const DEFAULT_DATA = [
   }
 
   function init() {
+    // 注意：define:vars 注入的 CATS 是 const，只能原地 push，不能重新赋值
+    CATS.push.apply(CATS, loadCustomCats());
     fillCatOptions(); restoreDraft(); bindEvents();
     var loaded = loadLocal();
-    if (loaded && Array.isArray(loaded) && loaded.length) { STATE.all = loaded; }
+    if (loaded && Array.isArray(loaded) && loaded.length) { STATE.all = migrateLayers(loaded); saveLocal(STATE.all); }
     else { STATE.all = DEFAULT_DATA.slice(); saveLocal(STATE.all); }
     refreshAll();
   }
