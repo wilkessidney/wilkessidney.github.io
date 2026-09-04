@@ -56,16 +56,42 @@ const DEFAULT_DATA = [
   </section>
 
   <section class="wb-sec">
-    <div class="wb-tabs">
-      <button class="wb-tab on" data-tab="作品">作品<span class="wb-n" id="n1"></span></button>
-      <button class="wb-tab" data-tab="文章">文章<span class="wb-n" id="n2"></span></button>
-      <button class="wb-tab" data-tab="思考">思考<span class="wb-n" id="n3"></span></button>
+    <div class="wb-tabs-row">
+      <div class="wb-tabs">
+        <button class="wb-tab on" data-tab="作品">作品<span class="wb-n" id="n1"></span></button>
+        <button class="wb-tab" data-tab="文章">文章<span class="wb-n" id="n2"></span></button>
+        <button class="wb-tab" data-tab="思考">思考<span class="wb-n" id="n3"></span></button>
+      </div>
+      <button class="wb-btn wb-sm wb-write" id="writeBtn" type="button">＋ 写文章</button>
     </div>
     <div class="wb-bar">
       <input class="wb-search" id="q" type="text" placeholder="搜索标题或描述…" autocomplete="off" />
       <div class="wb-chips" id="chips"></div>
     </div>
     <div id="list"></div>
+  </section>
+
+  <section class="wb-form" id="writeSec" style="display:none">
+    <div class="wb-form-h">
+      <h2>写文章</h2>
+      <button class="wb-btn wb-sm" id="writeCloseBtn" type="button">收起</button>
+    </div>
+    <p class="wb-write-hint">生成 Markdown 文件后，放入仓库 <code>src/content/articles/</code> 目录并推送，构建后即发布到「文章」板块。</p>
+    <form id="writeForm">
+      <div class="wb-frow">
+        <div class="wb-fi"><label>标题 *</label><input id="w_title" type="text" required placeholder="文章标题" /></div>
+        <div class="wb-fi"><label>摘要 *</label><input id="w_summary" type="text" required placeholder="一句话说清这篇文章讲什么" /></div>
+      </div>
+      <div class="wb-frow">
+        <div class="wb-fi"><label>分类</label><select id="w_cat"><option>技术</option><option>学习笔记</option><option>读书观影</option><option>长文专题</option></select></div>
+        <div class="wb-fi"><label>标签（逗号分隔）</label><input id="w_tags" type="text" placeholder="量化, 随笔" /></div>
+        <div class="wb-fi"><label>文件名 slug（可选）</label><input id="w_slug" type="text" placeholder="留空则按标题生成" /></div>
+      </div>
+      <div class="wb-form-actions">
+        <label class="wb-toggle"><input id="w_draft" type="checkbox" /><span>存为草稿（构建时不发布）</span></label>
+        <button class="wb-btn wb-pri" id="writeSubmit" type="submit">生成 Markdown</button>
+      </div>
+    </form>
   </section>
 
   <section class="wb-form">
@@ -181,6 +207,16 @@ const DEFAULT_DATA = [
   .wb-pin .wb-pt { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
   .wb-pin .wb-pd { font-size: 12px; color: var(--text-soft); line-height: 1.45; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+  .wb-tabs-row { display: flex; gap: 10px; align-items: stretch; margin-bottom: 14px; }
+  .wb-tabs-row .wb-tabs { flex: 1; margin-bottom: 0; }
+  .wb-write { flex: 0 0 auto; white-space: nowrap; }
+  .wb-write-hint {
+    font-size: 12px; color: var(--text-soft); margin: -6px 0 12px; line-height: 1.6;
+  }
+  .wb-write-hint code {
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+    font-size: 11px; background: var(--bg-soft); padding: 1px 5px; border-radius: 4px;
+  }
   .wb-tabs {
     display: flex; gap: 4px; background: var(--card); border: 1px solid var(--border);
     border-radius: 10px; padding: 4px; margin-bottom: 14px; flex-wrap: wrap;
@@ -538,6 +574,49 @@ const DEFAULT_DATA = [
     } catch (e) { toast(t); }
   }
 
+  // ---------- 写文章入口 ----------
+  function slugify(t) {
+    var raw = String(t || '').trim().toLowerCase().replace(/\s+/g, '-');
+    var ascii = raw.replace(/[^a-z0-9\-]/g, '');
+    return ascii || raw; // 纯中文标题时保留中文文件名（glob loader 支持）
+  }
+  function yamlStr(v) {
+    return '"' + String(v || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+  }
+  function buildArticleMd(f) {
+    var tags = f.tags ? f.tags.split(/[,，]/).map(function (t) { return t.trim(); }).filter(Boolean) : [];
+    var lines = [
+      '---',
+      'title: ' + yamlStr(f.title),
+      'date: ' + f.date,
+      'summary: ' + yamlStr(f.summary),
+      'category: ' + f.cat,
+      'tags: [' + tags.map(yamlStr).join(', ') + ']',
+      'draft: ' + f.draft,
+      '---',
+      '',
+      '',
+    ];
+    return lines.join('\n');
+  }
+  function downloadMd(name, content) {
+    var blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 800);
+  }
+  function openWrite() {
+    $('writeSec').style.display = '';
+    $('writeBtn').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(function () { $('w_title').focus(); }, 350);
+  }
+  function closeWrite() {
+    $('writeSec').style.display = 'none';
+    $('writeForm').reset();
+  }
+
   function bindEvents() {
     document.querySelector('.wb-tabs').addEventListener('click', function (e) {
       var b = e.target.closest('.wb-tab'); if (!b) return;
@@ -600,6 +679,25 @@ const DEFAULT_DATA = [
       }
     });
     $('f_newcat').addEventListener('blur', function () { setTimeout(closeNewCat, 120); });
+
+    $('writeBtn').addEventListener('click', openWrite);
+    $('writeCloseBtn').addEventListener('click', closeWrite);
+    $('writeForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var f = {
+        title: $('w_title').value.trim(),
+        summary: $('w_summary').value.trim(),
+        cat: $('w_cat').value,
+        tags: $('w_tags').value.trim(),
+        draft: $('w_draft').checked,
+        date: new Date().toISOString().slice(0, 10),
+      };
+      if (!f.title || !f.summary) { toast('标题和摘要必填', 'err'); return; }
+      var slug = slugify($('w_slug').value || f.title);
+      downloadMd(slug + '.md', buildArticleMd(f));
+      toast((f.draft ? '草稿' : '文章') + ' ' + slug + '.md 已生成，放入 src/content/articles/ 推送即发布', 'ok');
+      closeWrite();
+    });
 
     $('addForm').addEventListener('submit', function (e) {
       e.preventDefault();
